@@ -3,7 +3,7 @@ author: "@GlueOps"
 description: "Abstracts multiple OpenTofu actions from @dflook and provides a streamlined workflow with some basic customization"
 branding:
   icon: 'box'
-  color: 'red'
+  color: 'yellow'
 
 inputs:
   path:
