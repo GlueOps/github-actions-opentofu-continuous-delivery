@@ -4,7 +4,8 @@ Example using AWS S3 Backend state storage:
 
 ```yaml
 env:
-  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  TERRAFORM_ACTIONS_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  OPENTOFU_VERSION: "1.6.2"
   # more provider environment variables can be set here
 
 
