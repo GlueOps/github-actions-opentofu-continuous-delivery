@@ -145,7 +145,7 @@ runs:
         add_github_comment:  ${{ inputs.add_github_comment }}
 
     - name: tofu apply
-      if: github.ref_name == 'main' && github.event.pull_request.merged
+      if: github.ref_name == 'main'
       uses: dflook/tofu-apply@v1
       with:
         path: ${{ inputs.path }}
