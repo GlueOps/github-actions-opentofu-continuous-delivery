@@ -149,7 +149,7 @@ runs:
         add_github_comment:  ${{ inputs.add_github_comment }}
 
     - name: tofu apply
-      if: github.ref_name == ${{ inputs.target_branch_to_apply }}
+      if: github.ref_name == '${{ inputs.target_branch_to_apply }}'
       uses: dflook/tofu-apply@v1
       with:
         path: ${{ inputs.path }}
