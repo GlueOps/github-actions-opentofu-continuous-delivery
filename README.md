@@ -20,6 +20,9 @@ on:
 jobs:
   terraform-action:
     runs-on: ubuntu-latest
+    concurrency:
+      group: limit-concurrency-do-not-remove-this
+      cancel-in-progress: false
     steps:
       - name: OpenTofu CD              
         uses: GlueOps/github-actions-opentofu-continuous-delivery@main
