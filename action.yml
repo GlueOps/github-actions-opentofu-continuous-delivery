@@ -1,10 +1,10 @@
 name: "OpenTofu - Continuous Delivery"
 author: "@GlueOps"
 description: "Abstracts multiple OpenTofu actions from @dflook and provides a streamlined workflow with some basic customization"
+# https://actions-cool.github.io/github-action-branding/
 branding:
-  icon: 'box'
+  icon: 'upload-cloud'
   color: 'yellow'
-
 inputs:
   path:
     description: Path to the tofu configuration
