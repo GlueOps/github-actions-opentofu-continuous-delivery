@@ -1,9 +1,12 @@
 # OpenTofu - Continuous Delivery
 
+Example using AWS S3 Backend state storage:
 
 ```yaml
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  # more provider environment variables can be set here
+
 
 name: OpenTofu CD
 
@@ -27,3 +30,8 @@ jobs:
             region=${{ vars.TF_S3_BACKEND_BUCKET_REGION }}
             key=${{ github.repository }}/terraform.tfstate
 ```
+
+This action is an opinionated wrapped around the work of Daniel Flook: https://github.com/dflook/terraform-github-actions
+
+
+
