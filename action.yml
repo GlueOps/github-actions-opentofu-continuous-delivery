@@ -1,0 +1,167 @@
+name: "OpenTofu - Continuous Delivery"
+author: "@GlueOps"
+description: "Abstracts multiple OpenTofu actions from @dflook and provides a streamlined workflow with some basic customization"
+# https://actions-cool.github.io/github-action-branding/
+branding:
+  icon: 'upload-cloud'
+  color: 'yellow'
+inputs:
+  path:
+    description: Path to the tofu configuration
+    required: false
+    default: .
+  workspace:
+    description: Name of the tofu workspace
+    required: false
+    default: default
+  backend_config:
+    description: List of backend config values to set, one per line
+    required: false
+    default: ""
+  backend_config_file:
+    description: Path to a backend config file
+    required: false
+    default: ""
+  variables:
+    description: Variable definitions
+    required: false
+  var_file:
+    description: List of var file paths, one per line
+    required: false
+    default: ""
+  parallelism:
+    description: Limit the number of concurrent operations
+    required: false
+    default: "0"
+  label:
+    description: A friendly name for this plan
+    required: false
+    default: ""
+  auto_approve:
+    description: Automatically approve and apply plan
+    required: false
+    default: "false"
+  target:
+    description: List of resources to target for the apply, one per line
+    required: false
+    default: ""
+  replace:
+    description: List of resources to replace if an update is required, one per line
+    required: false
+    default: ""
+  destroy:
+    description: Create and apply a plan to destroy all resources
+    required: false
+    default: "false"
+  plan_path:
+    description: Path to the plan file to apply.
+    required: false
+    default: ""
+  backend_type:
+    description: The backend plugin name
+    required: true
+  add_github_comment:
+    description: Add the plan to a GitHub PR
+    required: false
+    default: "true"
+  target_branch_to_apply:
+    description: The name of the branch to trigger an apply on.
+    required: true
+    default: "main"
+  
+    
+outputs:
+  tofu:
+    description: The tofu version used by the configuration
+  changes:
+    description: If the generated plan would update any resources or outputs this is set to `true`, otherwise it's set to `false`.
+  to_add:
+    description: The number of resources that would be added by this plan
+  to_change:
+    description: The number of resources that would be changed by this plan
+  to_destroy:
+    description: The number of resources that would be destroyed by this plan
+  plan_path:
+    description: Path to a file in the workspace containing the generated plan in an opaque binary format.
+  text_plan_path:
+    description: Path to a file in the workspace containing the generated plan in human readable format. This won't be set if the backend type is `remote` and `auto_approve` is `true`
+  json_plan_path:
+    description: Path to a file in the workspace containing the generated plan in JSON format. This won't be set if the backend type is `remote`.
+  run_id:
+    description: If the root module uses the `remote` or `cloud` backend in remote execution mode, this output will be set to the remote run id.
+  failure-reason:
+    description: The reason for the build failure. May be `apply-failed` or `plan-changed`.
+  
+
+runs:
+  using: "composite"
+  steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: tofu fmt
+      uses: dflook/tofu-fmt-check@v1
+      id: fmt-check
+      with:
+        path: ${{ inputs.path }}
+        workspace: ${{ inputs.workspace }}
+        backend_config: ${{ inputs.backend_config }}
+        backend_config_file: ${{ inputs.backend_config_file }}
+
+    - name: Wrong formatting found
+      if: ${{ failure() && steps.fmt-check.outputs.failure-reason == 'check-failed' }}
+      shell: bash
+      run: echo "Please format your tofu correctly. Use 'tofu fmt' or 'tofu fmt'"
+
+    - name: tofu validate
+      uses: dflook/tofu-validate@v1
+      id: Validation
+      with:
+        path: ${{ inputs.path }}
+        workspace: ${{ inputs.workspace }}
+        backend_config: ${{ inputs.backend_config }}
+        backend_config_file: ${{ inputs.backend_config_file }}
+
+    - name: Test tofu-version
+      uses: dflook/tofu-version@v1
+      id: Versions
+      with:
+        path: ${{ inputs.path }}
+        workspace: ${{ inputs.workspace }}
+        backend_config: ${{ inputs.backend_config }}
+        backend_config_file: ${{ inputs.backend_config_file }}
+  
+    - name: tofu plan
+      if: github.event.pull_request != null
+      uses: dflook/tofu-plan@v1
+      with:
+        path: ${{ inputs.path }}
+        workspace: ${{ inputs.workspace }}
+        backend_config: ${{ inputs.backend_config }}
+        backend_config_file: ${{ inputs.backend_config_file }}
+        variables: ${{ inputs.variables }}
+        var_file: ${{ inputs.var_file }}
+        parallelism: ${{ inputs.parallelism }}
+        label: ${{ inputs.label }}
+        target: ${{ inputs.target }}
+        replace: ${{ inputs.replace }}
+        destroy: ${{ inputs.destroy }}
+        add_github_comment:  ${{ inputs.add_github_comment }}
+
+    - name: tofu apply
+      if: github.ref_name == 'main'
+      uses: dflook/tofu-apply@v1
+      with:
+        path: ${{ inputs.path }}
+        workspace: ${{ inputs.workspace }}
+        backend_config: ${{ inputs.backend_config }}
+        backend_config_file: ${{ inputs.backend_config_file }}
+        variables: ${{ inputs.variables }}
+        var_file: ${{ inputs.var_file }}
+        parallelism: ${{ inputs.parallelism }}
+        label: ${{ inputs.label }}
+        auto_approve: ${{ inputs.auto_approve }}
+        target: ${{ inputs.target }}
+        replace: ${{ inputs.replace }}
+        destroy: ${{ inputs.destroy }}
+        plan_path: ${{ inputs.plan_path }}
