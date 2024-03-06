@@ -96,7 +96,7 @@ runs:
       uses: actions/checkout@v4
 
     - name: tofu fmt
-      uses: dflook/tofu-fmt-check@v1
+      uses: dflook/tofu-fmt-check@v1.42.0
       id: fmt-check
       with:
         path: ${{ inputs.path }}
@@ -110,7 +110,7 @@ runs:
       run: echo "Please format your tofu correctly. Use 'tofu fmt' or 'tofu fmt'"
 
     - name: tofu validate
-      uses: dflook/tofu-validate@v1
+      uses: dflook/tofu-validate@v1.42.0
       id: Validation
       with:
         path: ${{ inputs.path }}
@@ -119,7 +119,7 @@ runs:
         backend_config_file: ${{ inputs.backend_config_file }}
 
     - name: Test tofu-version
-      uses: dflook/tofu-version@v1
+      uses: dflook/tofu-version@v1.42.0
       id: Versions
       with:
         path: ${{ inputs.path }}
@@ -129,7 +129,7 @@ runs:
   
     - name: tofu plan
       if: github.event.pull_request != null
-      uses: dflook/tofu-plan@v1
+      uses: dflook/tofu-plan@v1.42.0
       with:
         path: ${{ inputs.path }}
         workspace: ${{ inputs.workspace }}
@@ -146,7 +146,7 @@ runs:
 
     - name: tofu apply
       if: github.ref_name == 'main'
-      uses: dflook/tofu-apply@v1
+      uses: dflook/tofu-apply@v1.42.0
       with:
         path: ${{ inputs.path }}
         workspace: ${{ inputs.workspace }}
