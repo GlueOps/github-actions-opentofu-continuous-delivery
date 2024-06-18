@@ -25,7 +25,7 @@ jobs:
       cancel-in-progress: false
     steps:
       - name: OpenTofu CD              
-        uses: GlueOps/github-actions-opentofu-continuous-delivery@v0.0.3
+        uses: GlueOps/github-actions-opentofu-continuous-delivery@v0.0.5
         with:
           backend_config: |
             access_key=${{ vars.TF_S3_BACKEND_AWS_ACCESS_KEY }}
