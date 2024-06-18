@@ -129,7 +129,7 @@ runs:
   
     - name: tofu plan
       if: github.event.pull_request != null
-      uses: dflook/tofu-plan@58d900172d6a3ef86893145eedc4e54426cf11b9 # v1.42.0
+      uses: dflook/tofu-plan@ec79ba0f28dceb6dbcb9e556d5c8ead32794a365 # v1.43.0
       with:
         path: ${{ inputs.path }}
         workspace: ${{ inputs.workspace }}
