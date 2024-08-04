@@ -146,7 +146,7 @@ runs:
 
     - name: tofu apply
       if: github.ref_name == 'main' && github.event.pull_request.merged == true
-      uses: dflook/tofu-apply@d616dca95ca793b33640e7488312b576fa5da86e # v1.43.0
+      uses: dflook/tofu-apply@af009c1e6d9f60c424b495dd120f3673606b82d2 # v1.44.0
       with:
         path: ${{ inputs.path }}
         workspace: ${{ inputs.workspace }}
