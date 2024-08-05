@@ -96,7 +96,7 @@ runs:
       uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
 
     - name: tofu fmt
-      uses: dflook/tofu-fmt-check@c177dafa85cf5d25bd2f79a910f21a7ddd67a725 # v1.43.0
+      uses: dflook/tofu-fmt-check@ba2b30a799cba872b77f687b596ce398569990e3 # v1.44.0
       id: fmt-check
       with:
         path: ${{ inputs.path }}
