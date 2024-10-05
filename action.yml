@@ -143,6 +143,7 @@ runs:
         replace: ${{ inputs.replace }}
         destroy: ${{ inputs.destroy }}
         add_github_comment:  ${{ inputs.add_github_comment }}
+        plan_path: ${{ inputs.plan_path }}
 
     - name: tofu apply
       if: github.ref_name == 'main' && github.event.pull_request.merged == true
