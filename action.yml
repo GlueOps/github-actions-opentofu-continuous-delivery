@@ -150,6 +150,7 @@ runs:
       uses: trstringer/manual-approval@v1
       with:
         secret: ${{ github.TOKEN }}
+        approvers: ${{ github.actor }}
         minimum-approvals: 1
         issue-title: "Continue with tofu apply"
         issue-body: "Continue with tofu apply"
