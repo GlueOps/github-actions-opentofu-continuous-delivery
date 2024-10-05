@@ -168,6 +168,11 @@ runs:
         path: ${{ github.workspace }}/pr-${{ github.event.pull_request.number }}-tfplan.out
         if_no_artifact_found: fail
 
+    - name: debug files that exist
+      run: |
+        ls -alR
+      shell: bash
+
 
     - name: tofu apply
       if: github.ref_name == 'main' && github.event.pull_request.merged == true
