@@ -128,7 +128,6 @@ runs:
         backend_config_file: ${{ inputs.backend_config_file }}
   
     - name: tofu plan
-      if: github.event.pull_request != null
       uses: dflook/tofu-plan@830e0eb359a91f551ae9c06217ea855c0e87665b # v1.44.0
       with:
         path: ${{ inputs.path }}
