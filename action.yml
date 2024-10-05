@@ -147,7 +147,7 @@ runs:
 
     - name: debug files that exist
       run: ls -al
-      bash: shell
+      shell: bash
       
     - name: Upload tofu plan file (tfplan)
       if: github.event.pull_request != null
