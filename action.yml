@@ -148,8 +148,8 @@ runs:
       if: github.event.pull_request != null
       uses: actions/upload-artifact@v4
       with:
-        name: pr-${{ github.event.pull_request.number }}.tfplan
-        path: ${{ github.workspace }}/.dflook-terraform-github-actions/*/plan.tfplan
+        name: pr-${{ github.event.pull_request.number }}-tfplan.out
+        path: /tmp/plan.out
         if-no-files-found: 'error'
         retention-days: 90
         compression-level: 9
@@ -162,8 +162,8 @@ runs:
       uses: dawidd6/action-download-artifact@v6
       with:
         pr: ${{github.event.pull_request.number}}
-        name: pr-${{ github.event.pull_request.number }}.tfplan
-        path: ${{ github.workspace }}/pr-${{ github.event.pull_request.number }}.tfplan
+        name: pr-${{ github.event.pull_request.number }}-tfplan.out
+        path: ${{ github.workspace }}/pr-${{ github.event.pull_request.number }}-tfplan.out
         if_no_artifact_found: fail
 
 
@@ -183,4 +183,4 @@ runs:
         target: ${{ inputs.target }}
         replace: ${{ inputs.replace }}
         destroy: ${{ inputs.destroy }}
-        plan_path: pr-${{ github.event.pull_request.number }}.tfplan
+        plan_path: ${{ github.workspace }}/pr-${{ github.event.pull_request.number }}-tfplan.out
