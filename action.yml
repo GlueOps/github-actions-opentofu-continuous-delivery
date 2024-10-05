@@ -53,10 +53,6 @@ inputs:
     description: Create and apply a plan to destroy all resources
     required: false
     default: "false"
-  plan_path:
-    description: Path to the plan file to apply.
-    required: false
-    default: ""
   backend_type:
     description: The backend plugin name
     required: true
@@ -172,4 +168,4 @@ runs:
         target: ${{ inputs.target }}
         replace: ${{ inputs.replace }}
         destroy: ${{ inputs.destroy }}
-        plan_path: ${{ inputs.plan_path }}
+        plan_path: steps.plan.outputs.plan_path
