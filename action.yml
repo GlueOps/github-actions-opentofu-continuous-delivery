@@ -145,6 +145,9 @@ runs:
         add_github_comment:  ${{ inputs.add_github_comment }}
         plan_path: ${{ inputs.plan_path }}-pr-${{ github.event.pull_request.number }}
 
+    - name: debug files that exist
+      run: ls -al
+
     - name: Upload tofu plan file (tfplan)
       if: github.event.pull_request != null
       uses: actions/upload-artifact@v4
