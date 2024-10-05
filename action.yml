@@ -56,7 +56,7 @@ inputs:
   plan_path:
     description: Path to the plan file to apply.
     required: false
-    default: ""
+    default: "tfplan"
   backend_type:
     description: The backend plugin name
     required: true
