@@ -146,7 +146,7 @@ runs:
         plan_path: ${{ github.workspace }}/${{ inputs.plan_path }}-pr-${{ github.event.pull_request.number }}
         
     - name: debug files that exist
-      run: ls -al
+      run: ls -alR
       shell: bash
       
     - name: Upload tofu plan file (tfplan)
