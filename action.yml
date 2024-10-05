@@ -141,7 +141,9 @@ runs:
         add_github_comment:  ${{ inputs.add_github_comment }}
         
     - name: debug files that exist
-      run: ls -alR
+      run: |
+        ls -alR
+        cp .dflook-terraform-github-actions/*/plan.tfplan ./plan.tfplan
       shell: bash
       
     - name: Upload tofu plan file (tfplan)
@@ -149,7 +151,7 @@ runs:
       uses: actions/upload-artifact@v4
       with:
         name: pr-${{ github.event.pull_request.number }}-tfplan.out
-        path: /tmp/plan.out
+        path: ./plan.tfplan
         if-no-files-found: 'error'
         retention-days: 90
         compression-level: 9
