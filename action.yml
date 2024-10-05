@@ -190,4 +190,4 @@ runs:
         target: ${{ inputs.target }}
         replace: ${{ inputs.replace }}
         destroy: ${{ inputs.destroy }}
-        plan_path: ${{ github.workspace }}/pr-${{ github.event.pull_request.number }}-tfplan.out
+        plan_path: ${{ github.workspace }}/pr-${{ github.event.pull_request.number }}-tfplan.out/plan.tfplan
