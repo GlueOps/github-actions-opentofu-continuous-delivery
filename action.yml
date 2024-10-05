@@ -145,6 +145,28 @@ runs:
         add_github_comment:  ${{ inputs.add_github_comment }}
         plan_path: ${{ inputs.plan_path }}
 
+    - name: Upload tofu plan file (tfplan)
+      if: github.event.pull_request != null
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ inputs.plan_path }}-pr-${{ github.event.pull_request.number }}
+        path: ${{ inputs.plan_path }}
+        if-no-files-found: 'error'
+        retention-days: 90
+        compression-level: 9
+        overwrite: 'true'
+        include-hidden-files: 'false'
+      
+
+    - name: Download tofu plan file (tfplan)
+      if: github.ref_name == 'main' && github.event.pull_request.merged == true
+      uses: dawidd6/action-download-artifact@v6
+      with:
+        pr: ${{github.event.pull_request.number}}
+        name: ${{ inputs.plan_path }}-pr-${{ github.event.pull_request.number }}
+        if_no_artifact_found: fail
+
+
     - name: tofu apply
       if: github.ref_name == 'main' && github.event.pull_request.merged == true
       uses: dflook/tofu-apply@af009c1e6d9f60c424b495dd120f3673606b82d2 # v1.44.0
