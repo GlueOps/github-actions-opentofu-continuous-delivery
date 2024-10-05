@@ -144,6 +144,17 @@ runs:
         destroy: ${{ inputs.destroy }}
         add_github_comment:  ${{ inputs.add_github_comment }}
 
+
+    - name: Approve and continue with tofu apply
+      if: github.ref_name == 'main' && github.event.pull_request.merged == true
+      uses: trstringer/manual-approval@v1
+      with:
+        secret: ${{ github.TOKEN }}
+        minimum-approvals: 1
+        issue-title: "Continue with tofu apply"
+        issue-body: "Continue with tofu apply"
+        exclude-workflow-initiator-as-approver: false
+
     - name: tofu apply
       if: github.ref_name == 'main' && github.event.pull_request.merged == true
       uses: dflook/tofu-apply@af009c1e6d9f60c424b495dd120f3673606b82d2 # v1.44.0
