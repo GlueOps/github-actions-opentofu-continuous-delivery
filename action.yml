@@ -152,7 +152,6 @@ runs:
             "text": "OpenTofu workflow needs approval: Approval: https://github.com/${{ github.repository }}/issues (Find the relevant GitHub issue and approve with a comment) \n\n\nJOB ID: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/jobs/${{ github.job }}",
           }
       env:
-        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
 
 
