@@ -138,7 +138,7 @@ runs:
 
 
 
-## DO NOT REMOVE THIS UNLESS YOU WANT AUTO APPLY WITHOUT ANY APPROVALS.
+    ## DO NOT REMOVE THIS MANUAL APPROVAL STEP UNLESS YOU WANT AUTO APPLY WITHOUT ANY APPROVALS.
     - name: Approve and continue with tofu apply
       if: github.ref_name == 'main' && steps.plan.outputs.changes == 'true'
       uses: trstringer/manual-approval@v1
