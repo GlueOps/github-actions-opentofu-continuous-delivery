@@ -141,7 +141,6 @@ runs:
     - name: Approve or Deny tofu apply
       if: github.ref_name == 'main' && steps.plan.outputs.changes == 'true'
       uses: trstringer/manual-approval@v1
-      timeout-minutes: 15
       with:
         secret: ${{ github.TOKEN }}
         approvers: ${{ github.actor }}
