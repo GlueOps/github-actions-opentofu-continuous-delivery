@@ -56,6 +56,10 @@ inputs:
     description: Add the plan to a GitHub PR
     required: false
     default: "true"
+  manual_approval_timeout_minutes:
+    description: Manual approval timeout in minutes
+    required: false
+    default: 15
   
     
 outputs:
@@ -149,6 +153,7 @@ runs:
         issue-title: "Approve or Deny tofu apply"
         issue-body: "Approve or Deny tofu apply"
         exclude-workflow-initiator-as-approver: false
+        timeout-minutes: ${{ inputs.manual_approval_timeout_minutes }}
 
     - name: tofu apply
       if: github.ref_name == 'main' && steps.plan.outputs.changes == 'true'
