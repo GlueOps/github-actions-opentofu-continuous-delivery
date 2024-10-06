@@ -146,6 +146,7 @@ runs:
     - name: Approve or Deny tofu apply
       if: github.ref_name == 'main' && steps.plan.outputs.changes == 'true'
       uses: trstringer/manual-approval@v1
+      timeout-minutes: ${{ inputs.manual_approval_timeout_minutes }}
       with:
         secret: ${{ github.TOKEN }}
         approvers: ${{ github.actor }}
@@ -153,7 +154,6 @@ runs:
         issue-title: "Approve or Deny tofu apply"
         issue-body: "Approve or Deny tofu apply"
         exclude-workflow-initiator-as-approver: false
-        timeout-minutes: ${{ inputs.manual_approval_timeout_minutes }}
 
     - name: tofu apply
       if: github.ref_name == 'main' && steps.plan.outputs.changes == 'true'
