@@ -139,15 +139,15 @@ runs:
 
 
     ## DO NOT REMOVE THIS MANUAL APPROVAL STEP UNLESS YOU WANT AUTO APPLY WITHOUT ANY APPROVALS.
-    - name: Approve and continue with tofu apply
+    - name: Approve or Deny tofu apply
       if: github.ref_name == 'main' && steps.plan.outputs.changes == 'true'
       uses: trstringer/manual-approval@v1
       with:
         secret: ${{ github.TOKEN }}
         approvers: ${{ github.actor }}
         minimum-approvals: 1
-        issue-title: "Continue with tofu apply"
-        issue-body: "Continue with tofu apply"
+        issue-title: "Approve or Deny tofu apply"
+        issue-body: "Approve or Deny tofu apply"
         exclude-workflow-initiator-as-approver: false
 
     - name: tofu apply
