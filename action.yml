@@ -137,6 +137,8 @@ runs:
         add_github_comment:  ${{ inputs.add_github_comment }}
 
 
+
+## DO NOT REMOVE THIS UNLESS YOU WANT AUTO APPLY WITHOUT ANY APPROVALS.
     - name: Approve and continue with tofu apply
       if: github.ref_name == 'main' && steps.plan.outputs.changes == 'true'
       uses: trstringer/manual-approval@v1
