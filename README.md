@@ -19,7 +19,7 @@ on:
     types: [opened, synchronize, reopened] # If you open a PR it'll run a plan and comment the plan on a PR
   workflow_dispatch:
   schedule:
-    - cron: '0,30 * * * *' # Used for drift detection.
+    - cron: '0 16 * * *' # Used for drift detection.
 
 jobs:
   terraform-action:
