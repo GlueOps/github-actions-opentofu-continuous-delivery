@@ -142,7 +142,7 @@ runs:
 
     
     - name: Notify in Slack about Approving/Denying to continue workflow
-      if: github.ref_name == 'main' && steps.plan.outputs.changes == 'true' && ${{ inputs.enable_slack_notification_for_approval }} == 'true'
+      if: github.ref_name == 'main' && steps.plan.outputs.changes == 'true' && ${{ inputs.enable_slack_notification_for_approval }} == 'true' && github.event_name != 'pull_request'
       uses: slackapi/slack-github-action@v1.27.0
       with:
         # For posting a rich message using Block Kit
