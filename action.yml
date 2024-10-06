@@ -186,7 +186,6 @@ runs:
         destroy: ${{ inputs.destroy }}
 
     - name: Notify on completed apply
-      id: slack
       if: always()
       uses: slackapi/slack-github-action@v1.27.0
       with:
