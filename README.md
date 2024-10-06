@@ -27,6 +27,7 @@ jobs:
       - name: OpenTofu CD              
         uses: GlueOps/github-actions-opentofu-continuous-delivery@v0.0.5
         with:
+          enable_slack_notification_for_approval: "false"
           backend_config: |
             access_key=${{ vars.TF_S3_BACKEND_AWS_ACCESS_KEY }}
             secret_key=${{ secrets.TF_S3_BACKEND_AWS_SECRET_ACCESS_KEY }}
