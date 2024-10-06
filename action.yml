@@ -168,4 +168,4 @@ runs:
         target: ${{ inputs.target }}
         replace: ${{ inputs.replace }}
         destroy: ${{ inputs.destroy }}
-        plan_path: steps.plan.outputs.plan_path
+        plan_path: ${{ steps.plan.outputs.plan_path }}
