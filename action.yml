@@ -190,7 +190,7 @@ runs:
       with:
         payload: |
           {
-            "text": "https://github.com/${{ github.repository }} workflow completed with status of: *${{ job.status }}*\n\n\nJOB ID: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/jobs/${{ github.job }}"
+            "text": "https://github.com/${{ github.repository }} workflow completed with status of: *${{ job.conclusion }}*\n\n\nJOB ID: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/jobs/${{ github.job }}"
           }
       env:
         SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
