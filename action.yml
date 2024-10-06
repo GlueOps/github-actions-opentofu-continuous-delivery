@@ -148,7 +148,7 @@ runs:
         # For posting a rich message using Block Kit
         payload: |
           {
-            "text": "https://github.com/${{ github.repository }} \n\n\n Needs approval: https://github.com/${{ github.repository }}/issues \n\n _Note: Find the relevant GitHub issue and approve with a comment_ \n\n*JOB ID:* https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+            "text": "\n\n\n${{ github.repository }} \n*Pending approval:* @${{ github.actor }} \nhttps://github.com/${{ github.repository }}/issues \n_Note: Find the relevant GitHub issue and approve with a comment_ \nView Job: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
           }
       env:
         SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
@@ -190,7 +190,7 @@ runs:
       with:
         payload: |
           {
-            "text": "https://github.com/${{ github.repository }} workflow completed with status of: *${{ job.conclusion }}*\n\n\nJOB ID: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/jobs/${{ github.job }}"
+            "text": "\n\n\n*${{ github.repository }}* \nWorkflow completed with status of: *${{ job.conclusion }}*\nView Job: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/jobs/${{ github.job }}"
           }
       env:
         SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
