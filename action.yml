@@ -56,11 +56,6 @@ inputs:
     description: Add the plan to a GitHub PR
     required: false
     default: "true"
-  manual_approval_timeout_minutes:
-    description: Manual approval timeout in minutes
-    required: false
-    default: 15
-  
     
 outputs:
   tofu:
@@ -146,7 +141,7 @@ runs:
     - name: Approve or Deny tofu apply
       if: github.ref_name == 'main' && steps.plan.outputs.changes == 'true'
       uses: trstringer/manual-approval@v1
-      timeout-minutes: ${{ inputs.manual_approval_timeout_minutes }}
+      timeout-minutes: 15
       with:
         secret: ${{ github.TOKEN }}
         approvers: ${{ github.actor }}
