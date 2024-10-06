@@ -148,6 +148,7 @@ runs:
         # For posting a rich message using Block Kit
         payload: |
           {
+           "color": "#FFA500",
             "text": "__\n\n\n${{ github.repository }} \n*Pending approval:* @${{ github.actor }} \nhttps://github.com/${{ github.repository }}/issues \n_Note: Find the relevant GitHub issue and approve with a comment_ \nView Job/Status: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
           }
       env:
@@ -184,13 +185,27 @@ runs:
         replace: ${{ inputs.replace }}
         destroy: ${{ inputs.destroy }}
 
-    - name: Notify on completed apply
-      if: always()
+    - name: Notify on Success
+      if: always() && success()
       uses: slackapi/slack-github-action@v1.27.0
       with:
         payload: |
           {
-            "text": "__\n\n\n*${{ github.repository }}* - Workflow completed. \nView Job/Status: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+            "color": "good",
+            "text": "__\n\n\n*${{ github.repository }}* - Workflow Succeeded. \nView Job/Status: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          }
+      env:
+        SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
+
+
+    - name: Notify on Failure
+      if: always() && failure()
+      uses: slackapi/slack-github-action@v1.27.0
+      with:
+        payload: |
+          {
+            "color": "danger",
+            "text": "__\n\n\n*${{ github.repository }}* - Workflow FAILED. \nView Job/Status: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
           }
       env:
         SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
