@@ -1,6 +1,6 @@
 # OpenTofu - Continuous Delivery
 
-Example using AWS S3 Backend state storage:
+Example:
 
 ```yaml
 env:
@@ -14,8 +14,12 @@ name: OpenTofu CD
 on:
   push:
     branches:
-      - main
+      - main # This action has defaults that assume it will only apply off of main. It will not apply unless you "approve" the github issue per manual-approval GHA.
   pull_request:
+    types: [opened, synchronize, reopened] # If you open a PR it'll run a plan and comment the plan on a PR
+  workflow_dispatch:
+  schedule:
+    - cron: '0,30 * * * *' # Used for drift detection.
 
 jobs:
   terraform-action:
@@ -36,7 +40,9 @@ jobs:
             key=${{ github.repository }}/terraform.tfstate
 ```
 
-This action is an opinionated wrapped around the work of Daniel Flook: https://github.com/dflook/terraform-github-actions
+This action is an opinionated wrapper around the work of Daniel Flook: https://github.com/dflook/terraform-github-actions and leverages https://github.com/trstringer/manual-approval as the approval step before applying. Slack notifications are also enabled by default.
 
+
+If you have a security issue you would like to report please use security@glueops.dev to contact us. For all other matters please submit a PR or a github issue.
 
 
