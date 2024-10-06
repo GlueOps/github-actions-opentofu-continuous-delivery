@@ -149,7 +149,7 @@ runs:
         # For posting a rich message using Block Kit
         payload: |
           {
-            "text": "OpenTofu workflow needs approval: Approval: https://github.com/${{ github.repository }}/issues (Find the relevant GitHub issue and approve with a comment) \n\n\nJOB ID: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/jobs/${{ github.job }}",
+            "text": "OpenTofu workflow needs approval: Approval: https://github.com/${{ github.repository }}/issues (Find the relevant GitHub issue and approve with a comment) \n\n\nJOB ID: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/jobs/${{ github.job }}"
           }
       env:
         SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
