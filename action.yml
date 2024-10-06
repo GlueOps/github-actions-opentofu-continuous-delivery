@@ -148,7 +148,7 @@ runs:
         # For posting a rich message using Block Kit
         payload: |
           {
-            "text": "https://github.com/${{ github.repository }} \n\n\n Needs approval: https://github.com/${{ github.repository }}/issues \n\n _Note: Find the relevant GitHub issue and approve with a comment_ \n\n*JOB ID:* https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/jobs/${{ github.job }}"
+            "text": "https://github.com/${{ github.repository }} \n\n\n Needs approval: https://github.com/${{ github.repository }}/issues \n\n _Note: Find the relevant GitHub issue and approve with a comment_ \n\n*JOB ID:* https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
           }
       env:
         SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
