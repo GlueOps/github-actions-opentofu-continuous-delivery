@@ -37,10 +37,6 @@ inputs:
     description: A friendly name for this plan
     required: false
     default: ""
-  auto_approve:
-    description: Automatically approve and apply plan
-    required: false
-    default: "false"
   target:
     description: List of resources to target for the apply, one per line
     required: false
@@ -164,7 +160,7 @@ runs:
         var_file: ${{ inputs.var_file }}
         parallelism: ${{ inputs.parallelism }}
         label: ${{ inputs.label }}
-        auto_approve: ${{ inputs.auto_approve }}
+        auto_approve: "true"
         target: ${{ inputs.target }}
         replace: ${{ inputs.replace }}
         destroy: ${{ inputs.destroy }}
