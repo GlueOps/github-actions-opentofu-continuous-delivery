@@ -56,6 +56,10 @@ inputs:
     description: Add the plan to a GitHub PR
     required: false
     default: "true"
+  enable_slack_notification_for_approval:
+    description: Enable or Disable slack notifications
+    required: false
+    default: "true"
     
 outputs:
   tofu:
@@ -136,7 +140,23 @@ runs:
         add_github_comment:  ${{ inputs.add_github_comment }}
 
 
+    
+    - name: Notify in Slack about Approving/Denying to continue workflow
+      id: slack
+      if: github.ref_name == 'main' && steps.plan.outputs.changes == 'true' && ${{ inputs.enable_slack_notification_for_approval }} == 'true'
+      uses: slackapi/slack-github-action@v1.27.0
+      with:
+        # For posting a rich message using Block Kit
+        payload: |
+          {
+            "text": "OpenTofu workflow needs approval: Approval: https://github.com/${{ github.repository }}/issues (Find the relevant GitHub issue and approve with a comment) \n\n\nJOB ID: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/jobs/${{ github.job }}",
+          }
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
 
+
+    ## IMPORTANT
     ## DO NOT REMOVE THIS MANUAL APPROVAL STEP UNLESS YOU WANT AUTO APPLY WITHOUT ANY APPROVALS.
     - name: Approve or Deny tofu apply
       if: github.ref_name == 'main' && steps.plan.outputs.changes == 'true'
@@ -161,7 +181,7 @@ runs:
         var_file: ${{ inputs.var_file }}
         parallelism: ${{ inputs.parallelism }}
         label: ${{ inputs.label }}
-        auto_approve: "true"
+        auto_approve: "true" # SET TO FALSE TO DISABLE AUTO APPLY.
         target: ${{ inputs.target }}
         replace: ${{ inputs.replace }}
         destroy: ${{ inputs.destroy }}
