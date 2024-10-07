@@ -147,16 +147,16 @@ runs:
       with:
         payload: |
           {
-              "text": "Workflow needs approval",
+              "text": ":raising_hand: OpenTofu workflow needs approval :raising_hand:",
               "attachments": [
                 {
                   "pretext": "View Job/Status: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}",
-                  "color": "dbab09",
+                  "color": "FFA500",
                   "fields": [
                     {
                       "title": "{{ github.repository }}",
                       "short": true,
-                      "value": "Approval Required: https://github.com/${{ github.repository }}/issues "
+                      "value": ":raising_hand: Approval Required: https://github.com/${{ github.repository }}/issues"
                     }
                   ]
                 }
@@ -202,16 +202,16 @@ runs:
       with:
         payload: |
           {
-              "text": "Workflow - SUCCESS",
+              "text": ":large_green_circle: OpenTofu workflow - SUCCESS :large_green_circle:",
               "attachments": [
                 {
-                  "pretext": "View Job/Status: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}",
+                  "pretext": ":large_green_circle: View Job Details: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}",
                   "color": "00FF00",
                   "fields": [
                     {
                       "title": "${{ github.repository }}",
                       "short": true,
-                      "value": "SUCCESS"
+                      "value": ":large_green_circle: SUCCESS :large_green_circle:"
                     }
                   ]
                 }
@@ -227,16 +227,16 @@ runs:
       with:
         payload: |
           {
-              "text": "Workflow - FAILURE",
+              "text": ":rotating_light: OpenTofu workflow - FAILURE :rotating_light:",
               "attachments": [
                 {
-                  "pretext": "View Job/Status: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}",
+                  "pretext": ":rotating_light: View Job Details: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}",
                   "color": "FF0000",
                   "fields": [
                     {
                       "title": "${{ github.repository }}",
                       "short": true,
-                      "value": "FAILURE"
+                      "value": ":rotating_light: FAILURE :rotating_light:"
                     }
                   ]
                 }
