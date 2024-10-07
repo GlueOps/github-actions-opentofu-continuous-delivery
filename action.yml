@@ -209,7 +209,7 @@ runs:
                   "color": "00FF00",
                   "fields": [
                     {
-                      "title": "{{ github.repository }}",
+                      "title": "${{ github.repository }}",
                       "short": true,
                       "value": "SUCCESS"
                     }
@@ -234,7 +234,7 @@ runs:
                   "color": "FF0000",
                   "fields": [
                     {
-                      "title": "{{ github.repository }}",
+                      "title": "${{ github.repository }}",
                       "short": true,
                       "value": "FAILURE"
                     }
