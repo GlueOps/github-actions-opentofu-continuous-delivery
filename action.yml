@@ -205,7 +205,7 @@ runs:
               "text": ":large_green_circle: OpenTofu workflow - SUCCESS :large_green_circle:",
               "attachments": [
                 {
-                  "pretext": ":large_green_circle: <Job Details|https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}> \n:<Repository ${{ github.event.repository.name }|https://github.com/${{ github.repository }}>",
+                  "pretext": ":large_green_circle: <Job Details|https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}> \n:<Repository ${{ github.event.repository.name }}|https://github.com/${{ github.repository }}>",
                   "color": "00FF00",
                   "fields": [
                     {
