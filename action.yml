@@ -210,7 +210,7 @@ runs:
                   "fields": [
                     {
                       "title": "${{ github.repository }}",
-                      "short": true,
+                      "short": false,
                       "value": ":large_green_circle: SUCCESS :large_green_circle:"
                     }
                   ]
