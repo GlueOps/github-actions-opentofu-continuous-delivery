@@ -209,7 +209,7 @@ runs:
                   "color": "00FF00",
                   "fields": [
                     {
-                      "title": "${{ github.event.repository.name }} - https://github.com/${{ github.repository }}",
+                      "title": "<https://github.com/${{ github.repository }}|${{ github.event.repository.name }}>",
                       "short": false,
                       "value": ":large_green_circle: SUCCESS :large_green_circle:"
                     }
