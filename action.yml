@@ -143,7 +143,7 @@ runs:
       if: github.ref_name == 'main' && steps.plan.outputs.changes == 'true'
       shell: bash
       run: |
-          plan_details=$(cat ${{ steps.plan.outputs.text_plan_path }}
+          plan_details=$(cat ${{ steps.plan.outputs.text_plan_path }})
           echo "::notice title=Plan details :: ${plan_details}"
         
 
