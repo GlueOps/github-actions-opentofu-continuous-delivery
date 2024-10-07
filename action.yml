@@ -139,6 +139,14 @@ runs:
         destroy: ${{ inputs.destroy }}
         add_github_comment:  ${{ inputs.add_github_comment }}
 
+    - name: Plan Details as Annotation
+      if: github.ref_name == 'main' && steps.plan.outputs.changes == 'true'
+      shell: bash
+      run: |
+          plan_details=$(cat ${{ steps.plan.outputs.text_plan_path }}
+          echo "::notice title=Plan details :: ${plan_details}"
+        
+
 
     
     - name: Notify in Slack about Approving/Denying to continue workflow
