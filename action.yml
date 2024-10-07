@@ -154,7 +154,7 @@ runs:
                   "color": "FFA500",
                   "fields": [
                     {
-                      "title": "{{ github.repository }}",
+                      "title": "${{ github.event.repository.name }} - https://github.com/${{ github.repository }}",
                       "short": true,
                       "value": ":raising_hand: Approval Required: https://github.com/${{ github.repository }}/issues"
                     }
@@ -209,7 +209,7 @@ runs:
                   "color": "00FF00",
                   "fields": [
                     {
-                      "title": "${{ github.repository }}",
+                      "title": "${{ github.event.repository.name }} - https://github.com/${{ github.repository }}",
                       "short": false,
                       "value": ":large_green_circle: SUCCESS :large_green_circle:"
                     }
@@ -234,7 +234,7 @@ runs:
                   "color": "FF0000",
                   "fields": [
                     {
-                      "title": "${{ github.repository }}",
+                      "title": "${{ github.event.repository.name }} - https://github.com/${{ github.repository }}",
                       "short": true,
                       "value": ":rotating_light: FAILURE :rotating_light:"
                     }
