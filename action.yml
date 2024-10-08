@@ -37,10 +37,6 @@ inputs:
     description: A friendly name for this plan
     required: false
     default: ""
-  auto_approve:
-    description: Automatically approve and apply plan
-    required: false
-    default: "false"
   target:
     description: List of resources to target for the apply, one per line
     required: false
@@ -53,10 +49,6 @@ inputs:
     description: Create and apply a plan to destroy all resources
     required: false
     default: "false"
-  plan_path:
-    description: Path to the plan file to apply.
-    required: false
-    default: ""
   backend_type:
     description: The backend plugin name
     required: true
@@ -64,7 +56,10 @@ inputs:
     description: Add the plan to a GitHub PR
     required: false
     default: "true"
-  
+  enable_slack_notification_for_approval:
+    description: Enable or Disable slack notifications
+    required: false
+    default: "true"
     
 outputs:
   tofu:
@@ -128,7 +123,7 @@ runs:
         backend_config_file: ${{ inputs.backend_config_file }}
   
     - name: tofu plan
-      if: github.event.pull_request != null
+      id: plan
       uses: dflook/tofu-plan@830e0eb359a91f551ae9c06217ea855c0e87665b # v1.44.0
       with:
         path: ${{ inputs.path }}
@@ -144,8 +139,44 @@ runs:
         destroy: ${{ inputs.destroy }}
         add_github_comment:  ${{ inputs.add_github_comment }}
 
+
+    
+    - name: Notify in Slack about Approving/Denying to continue workflow
+      if: github.ref_name == 'main' && steps.plan.outputs.changes == 'true' && inputs.enable_slack_notification_for_approval == 'true' && github.event_name != 'pull_request'
+      uses: slackapi/slack-github-action@v1.27.0
+      with:
+        payload: |
+           {
+                "attachments": [
+                    {
+                        "color": "#FFA500",
+                        "author_name": ":link: OpenTofu - ${{ github.event.repository.name }} - Job Details",
+                        "author_link": "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}",
+                        "title": "https://github.com/${{ github.repository }}",
+                        "title_link": "https://github.com/${{ github.repository }}",
+                        "text": ":raising_hand: Approval Required: https://github.com/${{ github.repository }}/issues"
+                    }
+                ]
+            }
+      env:
+        SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
+
+
+    ## IMPORTANT
+    ## DO NOT REMOVE THIS MANUAL APPROVAL STEP UNLESS YOU WANT AUTO APPLY WITHOUT ANY APPROVALS.
+    - name: Approve or Deny tofu apply
+      if: github.ref_name == 'main' && steps.plan.outputs.changes == 'true'
+      uses: trstringer/manual-approval@v1
+      with:
+        secret: ${{ github.TOKEN }}
+        approvers: ${{ github.actor }}
+        minimum-approvals: 1
+        issue-title: "Approve or Deny tofu apply"
+        issue-body: "Approve or Deny tofu apply"
+        exclude-workflow-initiator-as-approver: false
+
     - name: tofu apply
-      if: github.ref_name == 'main' && github.event.pull_request.merged == true
+      if: github.ref_name == 'main' && steps.plan.outputs.changes == 'true'
       uses: dflook/tofu-apply@af009c1e6d9f60c424b495dd120f3673606b82d2 # v1.44.0
       with:
         path: ${{ inputs.path }}
@@ -156,8 +187,48 @@ runs:
         var_file: ${{ inputs.var_file }}
         parallelism: ${{ inputs.parallelism }}
         label: ${{ inputs.label }}
-        auto_approve: ${{ inputs.auto_approve }}
+        auto_approve: "true" # SET TO FALSE TO DISABLE AUTO APPLY.
         target: ${{ inputs.target }}
         replace: ${{ inputs.replace }}
         destroy: ${{ inputs.destroy }}
-        plan_path: ${{ inputs.plan_path }}
+
+    - name: Notify on Success
+      if: always() && success()
+      uses: slackapi/slack-github-action@v1.27.0
+      with:
+        payload: |
+           {
+                "attachments": [
+                    {
+                        "color": "#36a64f",
+                        "author_name": ":link: OpenTofu - ${{ github.event.repository.name }} - Job Details",
+                        "author_link": "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}",
+                        "title": "https://github.com/${{ github.repository }}",
+                        "title_link": "https://github.com/${{ github.repository }}",
+                        "text": ":large_green_circle: SUCCESS :large_green_circle:"
+                    }
+                ]
+            }
+      env:
+        SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
+
+
+    - name: Notify on Failure
+      if: always() && failure()
+      uses: slackapi/slack-github-action@v1.27.0
+      with:
+        payload: |
+           {
+                "attachments": [
+                    {
+                        "color": "#FF0000",
+                        "author_name": ":link: OpenTofu - ${{ github.event.repository.name }} - Job Details",
+                        "author_link": "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}",
+                        "title": "https://github.com/${{ github.repository }}",
+                        "title_link": "https://github.com/${{ github.repository }}",
+                        "text": ":rotating_light: FAILURE :rotating_light:"
+                    }
+                ]
+            }
+      env:
+        SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
