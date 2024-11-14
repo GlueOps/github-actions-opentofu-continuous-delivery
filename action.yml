@@ -143,7 +143,7 @@ runs:
     
     - name: Notify in Slack about Approving/Denying to continue workflow
       if: github.ref_name == 'main' && steps.plan.outputs.changes == 'true' && inputs.enable_slack_notification_for_approval == 'true' && github.event_name != 'pull_request'
-      uses: slackapi/slack-github-action@v1.27.0
+      uses: slackapi/slack-github-action@fcfb566f8b0aab22203f066d80ca1d7e4b5d05b3 # v1.27.1
       with:
         payload: |
            {
@@ -194,7 +194,7 @@ runs:
 
     - name: Notify on Success
       if: always() && success()
-      uses: slackapi/slack-github-action@v1.27.0
+      uses: slackapi/slack-github-action@fcfb566f8b0aab22203f066d80ca1d7e4b5d05b3 # v1.27.1
       with:
         payload: |
            {
@@ -215,7 +215,7 @@ runs:
 
     - name: Notify on Failure
       if: always() && failure()
-      uses: slackapi/slack-github-action@v1.27.0
+      uses: slackapi/slack-github-action@fcfb566f8b0aab22203f066d80ca1d7e4b5d05b3 # v1.27.1
       with:
         payload: |
            {
