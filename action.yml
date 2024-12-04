@@ -166,7 +166,7 @@ runs:
     ## DO NOT REMOVE THIS MANUAL APPROVAL STEP UNLESS YOU WANT AUTO APPLY WITHOUT ANY APPROVALS.
     - name: Approve or Deny tofu apply
       if: github.ref_name == 'main' && steps.plan.outputs.changes == 'true'
-      uses: trstringer/manual-approval@v1
+      uses: trstringer/manual-approval@662b3ddbc7685f897992051e87e1b4b58c07dc03 # v1
       with:
         secret: ${{ github.TOKEN }}
         approvers: ${{ github.actor }}
