@@ -90,6 +90,16 @@ runs:
     - name: Checkout
       uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
+    - name: Restore TF Cache
+      id: restore-cache
+      uses: actions/cache/restore@v4
+      with:
+        path: |
+          ~/.terraform.d/plugin-cache
+        key: terraform-${{ runner.os }}-${{ hashFiles('**/.terraform.lock.hcl') }}
+        restore-keys: |
+          terraform-${{ runner.os }}-
+
     - name: tofu fmt
       uses: dflook/tofu-fmt-check@56c1b5ad51656f26867fa03e404f6c7820fc2c97 # v1.48.0
       id: fmt-check
@@ -139,7 +149,15 @@ runs:
         destroy: ${{ inputs.destroy }}
         add_github_comment:  ${{ inputs.add_github_comment }}
 
-
+    - name: Restore TF Cache
+      id: save-cache
+      uses: actions/cache/save@v4
+      with:
+        path: |
+          ~/.terraform.d/plugin-cache
+        key: terraform-${{ runner.os }}-${{ hashFiles('**/.terraform.lock.hcl') }}
+        restore-keys: |
+          terraform-${{ runner.os }}-
     
     - name: Notify in Slack about Approving/Denying to continue workflow
       if: github.ref_name == 'main' && steps.plan.outputs.changes == 'true' && inputs.enable_slack_notification_for_approval == 'true' && github.event_name != 'pull_request'
