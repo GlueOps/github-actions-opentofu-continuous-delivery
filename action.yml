@@ -148,7 +148,7 @@ runs:
         destroy: ${{ inputs.destroy }}
         add_github_comment:  ${{ inputs.add_github_comment }}
 
-    - name: Restore TF Cache
+    - name: Save TF Cache
       id: save-cache
       uses: actions/cache/save@v4
       with:
@@ -156,6 +156,7 @@ runs:
         key: terraform-${{ runner.os }}-${{ hashFiles('**/.terraform.lock.hcl') }}
         restore-keys: |
           terraform-${{ runner.os }}-
+        save-always: true
     
     - name: Notify in Slack about Approving/Denying to continue workflow
       if: github.ref_name == 'main' && steps.plan.outputs.changes == 'true' && inputs.enable_slack_notification_for_approval == 'true' && github.event_name != 'pull_request'
