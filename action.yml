@@ -94,7 +94,7 @@ runs:
       id: restore-cache
       uses: actions/cache/restore@v4
       with:
-        path: ${{ runner.temp }}/_github_home/.terraform.d/plugin-cache
+        path: ${{ github.workspace }}/.terraform.d/plugin-cache
         key: terraform-${{ runner.os }}-${{ hashFiles('**/.terraform.lock.hcl') }}
         restore-keys: |
           terraform-${{ runner.os }}-
@@ -152,7 +152,7 @@ runs:
       id: save-cache
       uses: actions/cache/save@v4
       with:
-        path: ${{ runner.temp }}/_github_home/.terraform.d/plugin-cache
+        path: ${{ github.workspace }}/.terraform.d/plugin-cache
         key: terraform-${{ runner.os }}-${{ hashFiles('**/.terraform.lock.hcl') }}
         restore-keys: |
           terraform-${{ runner.os }}-
