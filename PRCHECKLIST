@@ -7,6 +7,6 @@
 # Checklist for changes
 --target main +title+ PR Checklist (required):
 --target main +task+ Is the README.md up to date with the latest changes?
---target main +task+ If possible, was the code tested end to end?
+--target main +task+ If possible, was the code tested end-to-end (E2E)?
 --target main +task+ Did you review any AI provided feedback?
   
