@@ -1,0 +1,17 @@
+# Checklist Buddy by Mibex Software https://www.mibexsoftware.com/
+# For more information, check our docs: https://docs.mibexsoftware.com/checklist-buddy/syntax-reference
+# https://github.com/marketplace/pull-request-checklist-buddy
+# https://github.com/mibexsoftware/checklist-buddy-demo/blob/main/PRCHECKLIST
+
+
+# Checklist for changes
+--target main --source-except renovate/* +title+ PR Checklist (required):
+--target main --source-except renovate/* +task+ Is the README.md up to date?
+--target main --source-except renovate/* +task+ Code tested appropriately (end-to-end considered)?
+--target main --source-except renovate/* +task+ Did you review any AI provided feedback?
+
+--target main --source renovate/* +title+ PR Checklist (required):
+--target main --source renovate/* +task+ Is the README.md up to date?
+--target main --source renovate/* +task+ Code tested appropriately (end-to-end considered)?
+--target main --source renovate/* +task+ Did you review the release notes for this automated update?
+
