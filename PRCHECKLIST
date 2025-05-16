@@ -1,0 +1,12 @@
+# Checklist Buddy by Mibex Software https://www.mibexsoftware.com/
+# For more information, check our docs: https://docs.mibexsoftware.com/checklist-buddy/syntax-reference
+# https://github.com/marketplace/pull-request-checklist-buddy
+# https://github.com/mibexsoftware/checklist-buddy-demo/blob/main/PRCHECKLIST
+
+
+# Checklist for changes
+--target main +title+ GlueOps Check List:
+--target main +task+ Is the README.md up to date with the latest changes?
+--target main +task+ If possible, was the code tested end to end?
+--target main +task+ Did you review any AI provided feedback?
+  
