@@ -86,26 +86,24 @@ outputs:
 
 runs:
   using: "composite"
-  env: 
-    TF_PLUGIN_CACHE_DIR: "${{ github.workspace }}/.terraform.d/plugin-cache"
   steps:
     - name: Checkout
       uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
     
-    - name: Ensure TF_PLUGIN_CACHE_DIR exists
-      run: mkdir -p ${{ env.TF_PLUGIN_CACHE_DIR }}
+    # - name: Ensure TF_PLUGIN_CACHE_DIR exists
+    #   run: mkdir -p ${{ env.TF_PLUGIN_CACHE_DIR }}
     
-    - name: Cache Terraform Plugin Cache Directory
-      uses: actions/cache@v4
-      id: cache-tf-plugin-dir
-      with:
-        path: ${{ env.TF_PLUGIN_CACHE_DIR }}
-        # Use a key that makes sense for your setup.
-        # Hashing .terraform.lock.hcl is good if you have one at the root
-        # or a specific one for the validated project.
-        key: tenant-tofu-plugin-cache
-        restore-keys: |
-          tenant-tofu-plugin-cache
+    # - name: Cache Terraform Plugin Cache Directory
+    #   uses: actions/cache@v4
+    #   id: cache-tf-plugin-dir
+    #   with:
+    #     path: ${{ env.TF_PLUGIN_CACHE_DIR }}
+    #     # Use a key that makes sense for your setup.
+    #     # Hashing .terraform.lock.hcl is good if you have one at the root
+    #     # or a specific one for the validated project.
+    #     key: tenant-tofu-plugin-cache
+    #     restore-keys: |
+    #       tenant-tofu-plugin-cache
     
     - name: tofu fmt
       uses: dflook/tofu-fmt-check@56c1b5ad51656f26867fa03e404f6c7820fc2c97 # v1.48.0
@@ -132,11 +130,11 @@ runs:
     
 
     #You can add a step to see the contents of the plugin cache for debugging if needed
-    - name: List Plugin Cache Contents
-      if: always() # Run even if previous steps fail, for debugging
-      run: |
-        echo "Contents of TF_PLUGIN_CACHE_DIR (${{ env.TF_PLUGIN_CACHE_DIR }}):"
-        ls -R ${{ env.TF_PLUGIN_CACHE_DIR }}
+    # - name: List Plugin Cache Contents
+    #   if: always() # Run even if previous steps fail, for debugging
+    #   run: |
+    #     echo "Contents of TF_PLUGIN_CACHE_DIR (${{ env.TF_PLUGIN_CACHE_DIR }}):"
+    #     ls -R ${{ env.TF_PLUGIN_CACHE_DIR }}
 
     - name: Test tofu-version
       uses: dflook/tofu-version@2dddc2620ee466aa55557a5cf3ce857436503470 # v1.48.0
