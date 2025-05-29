@@ -87,7 +87,7 @@ outputs:
 runs:
   using: "composite"
   env: 
-    TF_PLUGIN_CACHE_DIR: "${{ github.workspace }}/.terraform.d/plugin-cache"
+    TF_PLUGIN_CACHE_DIR: "${{ inputs.workspace }}/.terraform.d/plugin-cache"
   steps:
     - name: Checkout
       uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
