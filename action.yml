@@ -91,13 +91,13 @@ runs:
       uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
     
     - name: Ensure TF_PLUGIN_CACHE_DIR exists
-      run: mkdir -p ${{ env.TF_PLUGIN_CACHE_DIR }}
+      run: mkdir -p /github/workspace/.terraform.d/plugin-cache
     
     - name: Cache Terraform Plugin Cache Directory
       uses: actions/cache@v4
       id: cache-tf-plugin-dir
       with:
-        path: ${{ env.TF_PLUGIN_CACHE_DIR }}
+        path: /github/workspace/.terraform.d/plugin-cache
         # Use a key that makes sense for your setup.
         # Hashing .terraform.lock.hcl is good if you have one at the root
         # or a specific one for the validated project.
