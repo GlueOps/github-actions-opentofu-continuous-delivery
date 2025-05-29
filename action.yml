@@ -92,12 +92,8 @@ runs:
     
     - name: Ensure TF_PLUGIN_CACHE_DIR exists
       shell: bash
-      run: |
-        echo ${{ inputs.path }}
-        echo ${{ inputs.workspace }}
-        mkdir -p /github/workspace/.terraform.d/plugin-cache
+      run: mkdir -p /home/runner/work/tenant-kepler438b/tenant-kepler438b/.terraform.d/plugin-cache
 
-    
     - name: Cache Terraform Plugin Cache Directory
       uses: actions/cache@v4
       id: cache-tf-plugin-dir
