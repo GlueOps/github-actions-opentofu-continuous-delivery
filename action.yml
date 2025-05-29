@@ -134,8 +134,7 @@ runs:
 
     - name: List Plugin Cache Contents
       if: always() # Run even if previous steps fail, for debugging
-      run: |
-        ls -R /home/runner/work/tenant-kepler438b/tenant-kepler438b/.terraform.d/plugin-cache
+      shell: ls -R /home/runner/work/tenant-kepler438b/tenant-kepler438b/.terraform.d/plugin-cache
 
     - name: Test tofu-version
       uses: dflook/tofu-version@2dddc2620ee466aa55557a5cf3ce857436503470 # v1.48.0
