@@ -86,20 +86,18 @@ outputs:
 
 runs:
   using: "composite"
-  env: 
-    TF_PLUGIN_CACHE_DIR: "${{ inputs.workspace }}/.terraform.d/plugin-cache"
   steps:
     - name: Checkout
       uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
     
     - name: Ensure TF_PLUGIN_CACHE_DIR exists
-      run: mkdir -p ${{ env.TF_PLUGIN_CACHE_DIR }}
+      run: mkdir -p ${{ inputs.workspace }}/.terraform.d/plugin-cache
     
     - name: Cache Terraform Plugin Cache Directory
       uses: actions/cache@v4
       id: cache-tf-plugin-dir
       with:
-        path: ${{ env.TF_PLUGIN_CACHE_DIR }}
+        path: ${{ inputs.workspace }}/.terraform.d/plugin-cache
         # Use a key that makes sense for your setup.
         # Hashing .terraform.lock.hcl is good if you have one at the root
         # or a specific one for the validated project.
@@ -135,8 +133,8 @@ runs:
     - name: List Plugin Cache Contents
       if: always() # Run even if previous steps fail, for debugging
       run: |
-        echo "Contents of TF_PLUGIN_CACHE_DIR (${{ env.TF_PLUGIN_CACHE_DIR }}):"
-        ls -R ${{ env.TF_PLUGIN_CACHE_DIR }}
+        echo "Contents of TF_PLUGIN_CACHE_DIR (${{ inputs.workspace }}/.terraform.d/plugin-cache):"
+        ls -R ${{ inputs.workspace }}/.terraform.d/plugin-cache
 
     - name: Test tofu-version
       uses: dflook/tofu-version@2dddc2620ee466aa55557a5cf3ce857436503470 # v1.48.0
