@@ -84,7 +84,7 @@ outputs:
     description: The reason for the build failure. May be `apply-failed` or `plan-changed`.
 
 env:
-  TF_PLUGIN_CACHE_DIR_PATH_RELATIVE: /home/runner/work/tenant-kepler438b/tenant-kepler438b/.terraform.d/plugin-cache
+  TF_PLUGIN_CACHE_DIR_PATH_RELATIVE: /github/workspace/.terraform.d/plugin-cache
 
 runs:
   using: "composite"
@@ -132,12 +132,10 @@ runs:
         backend_config_file: ${{ inputs.backend_config_file }}
     
 
-    #You can add a step to see the contents of the plugin cache for debugging if needed
-    # - name: List Plugin Cache Contents
-    #   if: always() # Run even if previous steps fail, for debugging
-    #   run: |
-    #     echo "Contents of TF_PLUGIN_CACHE_DIR (${{ env.TF_PLUGIN_CACHE_DIR }}):"
-    #     ls -R ${{ env.TF_PLUGIN_CACHE_DIR }}
+    - name: List Plugin Cache Contents
+      if: always() # Run even if previous steps fail, for debugging
+      run: |
+        ls -R /home/runner/work/tenant-kepler438b/tenant-kepler438b/.terraform.d/plugin-cache
 
     - name: Test tofu-version
       uses: dflook/tofu-version@2dddc2620ee466aa55557a5cf3ce857436503470 # v1.48.0
