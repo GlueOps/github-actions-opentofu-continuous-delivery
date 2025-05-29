@@ -100,7 +100,7 @@ runs:
       uses: actions/cache@v4
       id: cache-tf-plugin-dir
       with:
-        path: ${{ env.TF_PLUGIN_CACHE_DIR_PATH_RELATIVE }}
+        path: /home/runner/work/tenant-kepler438b/tenant-kepler438b/.terraform.d/plugin-cache
         # Use a key that makes sense for your setup.
         # Hashing .terraform.lock.hcl is good if you have one at the root
         # or a specific one for the validated project.
