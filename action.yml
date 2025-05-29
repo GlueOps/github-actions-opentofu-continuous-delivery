@@ -82,7 +82,9 @@ outputs:
     description: If the root module uses the `remote` or `cloud` backend in remote execution mode, this output will be set to the remote run id.
   failure-reason:
     description: The reason for the build failure. May be `apply-failed` or `plan-changed`.
-  
+
+env:
+  TF_PLUGIN_CACHE_DIR_PATH_RELATIVE: /home/runner/work/tenant-kepler438b/tenant-kepler438b/.terraform.d/plugin-cache
 
 runs:
   using: "composite"
@@ -92,13 +94,13 @@ runs:
     
     - name: Ensure TF_PLUGIN_CACHE_DIR exists
       shell: bash
-      run: mkdir -p /home/runner/work/tenant-kepler438b/tenant-kepler438b/.terraform.d/plugin-cache
+      run: mkdir -p ${{ env.TF_PLUGIN_CACHE_DIR_PATH_RELATIVE }}
 
     - name: Cache Terraform Plugin Cache Directory
       uses: actions/cache@v4
       id: cache-tf-plugin-dir
       with:
-        path: /github/workspace/.terraform.d/plugin-cache
+        path: ${{ env.TF_PLUGIN_CACHE_DIR_PATH_RELATIVE }}
         # Use a key that makes sense for your setup.
         # Hashing .terraform.lock.hcl is good if you have one at the root
         # or a specific one for the validated project.
