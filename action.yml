@@ -177,7 +177,7 @@ runs:
 
     - name: tofu apply
       if: github.ref_name == 'main' && steps.plan.outputs.changes == 'true'
-      uses: dflook/tofu-apply@ec4134acaa2dd2cdee6496cd848bcec1b40c1a1f # v1.48.0
+      uses: dflook/tofu-apply@aabe748c21fba55bcd741a53211a8af90506962f # v1.49.0
       with:
         path: ${{ inputs.path }}
         workspace: ${{ inputs.workspace }}
