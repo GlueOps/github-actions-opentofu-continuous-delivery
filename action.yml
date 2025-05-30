@@ -126,6 +126,7 @@ runs:
       env:
         TERRAFORM_PRE_RUN: |
           export TF_DATA_DIR=/github/workspace/.terraform.d/
+          printenv
       with:
         path: ${{ inputs.path }}
         workspace: ${{ inputs.workspace }}
