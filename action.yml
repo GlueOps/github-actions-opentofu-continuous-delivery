@@ -130,11 +130,22 @@ runs:
         workspace: ${{ inputs.workspace }}
         backend_config: ${{ inputs.backend_config }}
         backend_config_file: ${{ inputs.backend_config_file }}
-    
 
     - name: List Plugin Cache Contents
       shell: bash
-      run: ls -R /home/runner/work/tenant-kepler438b/tenant-kepler438b/.terraform.d/plugin-cache
+      run: tree -L 5 /home/runner/work
+      
+    - name: Save Primes
+      id: cache-primes-save
+      uses: actions/cache/save@v4
+      with:
+        path: /home/runner/work/tenant-kepler438b/tenant-kepler438b/.terraform.d/plugin-cache
+        # Use a key that makes sense for your setup.
+        # Hashing .terraform.lock.hcl is good if you have one at the root
+        # or a specific one for the validated project.
+        key: tenant-tofu-plugin-cache
+        restore-keys: |
+          tenant-tofu-plugin-cache
 
     - name: Test tofu-version
       uses: dflook/tofu-version@2dddc2620ee466aa55557a5cf3ce857436503470 # v1.48.0
