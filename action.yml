@@ -125,12 +125,7 @@ runs:
       id: Validation
       env:
         TERRAFORM_PRE_RUN: |
-          printenv
-          echo $HOME
-          pwd
-          ls .
-          ls /github/workspace
-          cp /github/workspace/.terraformrc $HOME/
+          export TF_DATA_DIR=/github/workspace/.terraform.d/
       with:
         path: ${{ inputs.path }}
         workspace: ${{ inputs.workspace }}
