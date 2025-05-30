@@ -133,7 +133,7 @@ runs:
 
     - name: List Plugin Cache Contents
       shell: bash
-      run: tree -L 5 /home/runner/work
+      run: tree -a -L 5 /home/runner/work
 
     - name: Save Primes
       id: cache-primes-save
