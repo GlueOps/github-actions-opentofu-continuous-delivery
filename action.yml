@@ -124,7 +124,8 @@ runs:
       uses: dflook/tofu-validate@7cfd12bb79d82fb74d3fed49bc37045805e71cde # v1.48.0
       id: Validation
       env:
-        TF_CLI_CONFIG_FILE: /github/workspace/.terraformrc
+        TERRAFORM_PRE_RUN: |
+          export TF_CLI_CONFIG_FILE=/github/workspace/.terraformrc
       with:
         path: ${{ inputs.path }}
         workspace: ${{ inputs.workspace }}
