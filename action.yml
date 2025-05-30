@@ -105,8 +105,6 @@ runs:
         # Hashing .terraform.lock.hcl is good if you have one at the root
         # or a specific one for the validated project.
         key: tenant-tofu-plugin-cache
-        restore-keys: |
-          tenant-tofu-plugin-cache
     
     - name: tofu fmt
       uses: dflook/tofu-fmt-check@56c1b5ad51656f26867fa03e404f6c7820fc2c97 # v1.48.0
@@ -133,7 +131,7 @@ runs:
 
     - name: List Plugin Cache Contents
       shell: bash
-      run: tree -a -L 5 /home/runner/work
+      run: tree -a -L 5 /home/runner/work/tenant-kepler438b/tenant-kepler438b/.terraform.d/
 
     - name: Save Primes
       id: cache-primes-save
@@ -144,8 +142,7 @@ runs:
         # Hashing .terraform.lock.hcl is good if you have one at the root
         # or a specific one for the validated project.
         key: tenant-tofu-plugin-cache
-        restore-keys: |
-          tenant-tofu-plugin-cache
+        
 
     - name: Test tofu-version
       uses: dflook/tofu-version@2dddc2620ee466aa55557a5cf3ce857436503470 # v1.48.0
