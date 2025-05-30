@@ -84,7 +84,7 @@ outputs:
     description: The reason for the build failure. May be `apply-failed` or `plan-changed`.
 
 env:
-  TF_PLUGIN_CACHE_DIR: /github/workspace/.terraform.d/plugin-cache
+  TF_CLI_CONFIG_FILE: /github/workspace/.terraformrc
 
 runs:
   using: "composite"
@@ -96,15 +96,15 @@ runs:
       shell: bash
       run: mkdir -p  /home/runner/work/tenant-kepler438b/tenant-kepler438b/.terraform.d/plugin-cache
 
-    - name: Cache Terraform Plugin Cache Directory
-      uses: actions/cache@v4
-      id: cache-tf-plugin-dir
-      with:
-        path: /home/runner/work/tenant-kepler438b/tenant-kepler438b/.terraform.d/plugin-cache
-        # Use a key that makes sense for your setup.
-        # Hashing .terraform.lock.hcl is good if you have one at the root
-        # or a specific one for the validated project.
-        key: tenant-tofu-plugin-cache
+    # - name: Cache Terraform Plugin Cache Directory
+    #   uses: actions/cache@v4
+    #   id: cache-tf-plugin-dir
+    #   with:
+    #     path: /home/runner/work/tenant-kepler438b/tenant-kepler438b/.terraform.d/plugin-cache
+    #     # Use a key that makes sense for your setup.
+    #     # Hashing .terraform.lock.hcl is good if you have one at the root
+    #     # or a specific one for the validated project.
+    #     key: tenant-tofu-plugin-cache
     
     - name: tofu fmt
       uses: dflook/tofu-fmt-check@56c1b5ad51656f26867fa03e404f6c7820fc2c97 # v1.48.0
@@ -123,6 +123,8 @@ runs:
     - name: tofu validate
       uses: dflook/tofu-validate@7cfd12bb79d82fb74d3fed49bc37045805e71cde # v1.48.0
       id: Validation
+      env:
+        TF_CLI_CONFIG_FILE: /github/workspace/.terraformrc
       with:
         path: ${{ inputs.path }}
         workspace: ${{ inputs.workspace }}
@@ -131,17 +133,17 @@ runs:
 
     - name: List Plugin Cache Contents
       shell: bash
-      run: tree -a -L 5 /home/runner/work/tenant-kepler438b/tenant-kepler438b/.terraform.d/
+      run: tree -a -L 5 /home/runner/work/tenant-kepler438b/tenant-kepler438b/
 
-    - name: Save Primes
-      id: cache-primes-save
-      uses: actions/cache/save@v4
-      with:
-        path: /home/runner/work/tenant-kepler438b/tenant-kepler438b/.terraform.d/plugin-cache
-        # Use a key that makes sense for your setup.
-        # Hashing .terraform.lock.hcl is good if you have one at the root
-        # or a specific one for the validated project.
-        key: tenant-tofu-plugin-cache
+    # - name: Save Primes
+    #   id: cache-primes-save
+    #   uses: actions/cache/save@v4
+    #   with:
+    #     path: /home/runner/work/tenant-kepler438b/tenant-kepler438b/.terraform.d/plugin-cache
+    #     # Use a key that makes sense for your setup.
+    #     # Hashing .terraform.lock.hcl is good if you have one at the root
+    #     # or a specific one for the validated project.
+    #     key: tenant-tofu-plugin-cache
         
 
     - name: Test tofu-version
