@@ -84,7 +84,7 @@ outputs:
     description: The reason for the build failure. May be `apply-failed` or `plan-changed`.
 
 env:
-  TF_PLUGIN_CACHE_DIR_PATH_RELATIVE: /github/workspace/.terraform.d/plugin-cache
+  TF_PLUGIN_CACHE_DIR: /github/workspace/.terraform.d/plugin-cache
 
 runs:
   using: "composite"
@@ -134,7 +134,7 @@ runs:
     - name: List Plugin Cache Contents
       shell: bash
       run: tree -L 5 /home/runner/work
-      
+
     - name: Save Primes
       id: cache-primes-save
       uses: actions/cache/save@v4
