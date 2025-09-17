@@ -1,0 +1,17 @@
+name: Call a reusable workflow
+
+on:
+   schedule:
+    # The "*" (#42, asterisk) character has special semantics in YAML, so this
+    # string has to be quoted.
+    - cron: '0 0 */2 * *'
+
+jobs:
+  call-workflow-passing-data:
+    permissions:
+      contents: write
+      pull-requests: write
+
+    uses: GlueOps/github-workflows/.github/workflows/bump-version-cut-release.yaml@main
+    secrets:
+      token: ${{ secrets.GITHUB_TOKEN }}
