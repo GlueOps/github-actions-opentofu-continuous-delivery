@@ -105,7 +105,7 @@ runs:
       run: echo "Please format your tofu correctly. Use 'tofu fmt' or 'tofu fmt'"
 
     - name: tofu validate
-      uses: dflook/tofu-validate@14d0b353c4fa845c1745f42d71222e5eaae64dbc # v2.1.0
+      uses: dflook/tofu-validate@beb9bb77f83ff5e55f02120b06f4b1c54f23d4f7 # v2.2.2
       id: Validation
       with:
         path: ${{ inputs.path }}
