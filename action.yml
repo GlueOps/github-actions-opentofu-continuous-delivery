@@ -88,7 +88,7 @@ runs:
   using: "composite"
   steps:
     - name: Checkout
-      uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
+      uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
 
     - name: tofu fmt
       uses: dflook/tofu-fmt-check@dd2d1ec0ebbf7d1a0f41a13dc71b73dd8cd8c484 # v2.2.2
