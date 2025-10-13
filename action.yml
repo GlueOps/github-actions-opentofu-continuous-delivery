@@ -62,7 +62,7 @@ inputs:
     default: "true"
   ENABLE_DANGEROUS_AUTO_APPLY_MODE:
     description: "If enabled, any changes including: Destroy, Apply, Replace will be automatically approved."
-    require: false
+    required: false
     default: "false"
     
 outputs:
