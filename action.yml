@@ -60,6 +60,10 @@ inputs:
     description: Enable or Disable slack notifications
     required: false
     default: "true"
+  ENABLE_DANGEROUS_AUTO_APPLY_MODE:
+    description: "If enabled, any changes including: Destroy, Apply, Replace will be automatically approved."
+    required: false
+    default: "false"
     
 outputs:
   tofu:
@@ -142,7 +146,7 @@ runs:
 
     
     - name: Notify in Slack about Approving/Denying to continue workflow
-      if: github.ref_name == 'main' && steps.plan.outputs.changes == 'true' && inputs.enable_slack_notification_for_approval == 'true' && github.event_name != 'pull_request'
+      if: github.ref_name == 'main' && steps.plan.outputs.changes == 'true' && inputs.enable_slack_notification_for_approval == 'true' && github.event_name != 'pull_request' && inputs.ENABLE_DANGEROUS_AUTO_APPLY_MODE == 'false' 
       uses: slackapi/slack-github-action@fcfb566f8b0aab22203f066d80ca1d7e4b5d05b3 # v1.27.1
       with:
         payload: |
@@ -165,7 +169,7 @@ runs:
     ## IMPORTANT
     ## DO NOT REMOVE THIS MANUAL APPROVAL STEP UNLESS YOU WANT AUTO APPLY WITHOUT ANY APPROVALS.
     - name: Approve or Deny tofu apply
-      if: github.ref_name == 'main' && steps.plan.outputs.changes == 'true'
+      if: github.ref_name == 'main' && steps.plan.outputs.changes == 'true' && inputs.ENABLE_DANGEROUS_AUTO_APPLY_MODE == 'false'
       uses: trstringer/manual-approval@9f5e5d6bc511762e17f849775a3c56bdea6b4493 # v1
       with:
         secret: ${{ github.TOKEN }}
