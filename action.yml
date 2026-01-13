@@ -128,7 +128,7 @@ runs:
   
     - name: tofu plan
       id: plan
-      uses: dflook/tofu-plan@b6aca1083d8f3876bb60f47414ac53eed2b9e1e7 # v2.2.2
+      uses: dflook/tofu-plan@3f5dc358343fb58cd60f83b019e810315aa8258f # v2.2.3
       with:
         path: ${{ inputs.path }}
         workspace: ${{ inputs.workspace }}
