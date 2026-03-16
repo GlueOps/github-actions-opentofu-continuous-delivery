@@ -198,7 +198,7 @@ runs:
         destroy: ${{ inputs.destroy }}
 
     - name: Notify on Success
-      if: always() && success()
+      if: always() && success() && inputs.enable_slack_notification_for_approval == 'true'
       uses: slackapi/slack-github-action@91efab103c0de0a537f72a35f6b8cda0ee76bf0a # v2.1.1
       with:
         webhook-type: webhook-trigger
@@ -220,7 +220,7 @@ runs:
 
 
     - name: Notify on Failure
-      if: always() && failure()
+      if: always() && failure() && inputs.enable_slack_notification_for_approval == 'true'
       uses: slackapi/slack-github-action@91efab103c0de0a537f72a35f6b8cda0ee76bf0a # v2.1.1
       with:
         webhook-type: webhook-trigger
