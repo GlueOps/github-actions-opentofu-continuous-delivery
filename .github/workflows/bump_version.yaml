@@ -13,6 +13,6 @@ jobs:
       contents: write
       pull-requests: write
 
-    uses: GlueOps/github-workflows/.github/workflows/bump-version-cut-release.yaml@main
+    uses: GlueOps/github-workflows/.github/workflows/bump-version-cut-release.yaml@536dd7ba5e206a5a9ba4c01b0b5fc15aa5f5690a # main
     secrets:
       token: ${{ secrets.GITHUB_TOKEN }}
