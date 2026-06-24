@@ -2,7 +2,7 @@
 
 ## Introduction
 
-This action is an opinionated wrapper around the work of Daniel Flook: https://github.com/dflook/terraform-github-actions and leverages https://github.com/trstringer/manual-approval as the approval step before applying. Slack notifications are also enabled by default.
+This action is an opinionated wrapper around the work of Daniel Flook: https://github.com/dflook/terraform-github-actions and leverages https://github.com/trstringer/manual-approval as the approval step before applying.
 
 ## Usage
 
@@ -14,7 +14,6 @@ Example:
 env:
   TERRAFORM_ACTIONS_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   OPENTOFU_VERSION: "1.6.2"
-  SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
   # more provider environment variables can be set here
 
 
@@ -40,7 +39,6 @@ jobs:
       - name: OpenTofu CD              
         uses: GlueOps/github-actions-opentofu-continuous-delivery@v0.0.9
         with:
-          enable_slack_notification_for_approval: "true"
           backend_config: |
             access_key=${{ vars.TF_S3_BACKEND_AWS_ACCESS_KEY }}
             secret_key=${{ secrets.TF_S3_BACKEND_AWS_SECRET_ACCESS_KEY }}
@@ -60,6 +58,14 @@ jobs:
 ## Job Configuration
 - **Concurrency**: Limits concurrent runs to prevent overlapping runs.
 
+## Viewing the plan
+
+The plan is posted as a PR/commit comment via `add_github_comment`. GitHub comments are capped at ~64 KB, so large plans get truncated there. To make the full plan available regardless of size, every run also:
+
+- Renders the full, human-readable plan to the **job summary** page of the run (browser-viewable, searchable, no download).
+- Uploads the full plan as a downloadable **artifact** named `tofu-plan` (no practical size limit; fallback for very large plans).
+
+When an apply on `main` requires manual approval, the approval issue created by [manual-approval](https://github.com/trstringer/manual-approval) links directly to both the job summary and the artifact, so you can review the complete plan before approving — no need to cancel and re-run.
 
 ## Inputs
 
@@ -78,7 +84,8 @@ jobs:
 | `destroy` | Create and apply a plan to destroy all resources | ❌ | `false` |
 | `backend_type` | The backend plugin name | ✅ | _None_ |
 | `add_github_comment` | Add the plan to a GitHub PR | ❌ | `true` |
-| `enable_slack_notification_for_approval` | Enable or Disable Slack notifications | ❌ | `true` |
+| `enable_slack_notification_for_approval` | **Deprecated and ignored.** Slack notifications have been removed; retained only for backward compatibility. | ❌ | `true` |
+| `ENABLE_DANGEROUS_AUTO_APPLY_MODE` | If enabled, any changes including Destroy, Apply, and Replace will be automatically approved (skips the manual approval step). | ❌ | `false` |
 
 ## Outputs
 
