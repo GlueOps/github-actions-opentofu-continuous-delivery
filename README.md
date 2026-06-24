@@ -1,5 +1,7 @@
 # OpenTofu - Continuous Delivery
 
+[![Integration Test](https://github.com/GlueOps/github-actions-opentofu-continuous-delivery/actions/workflows/integration-test.yml/badge.svg)](https://github.com/GlueOps/github-actions-opentofu-continuous-delivery/actions/workflows/integration-test.yml)
+
 ## Introduction
 
 This action is an opinionated wrapper around the work of Daniel Flook: https://github.com/dflook/terraform-github-actions and leverages https://github.com/trstringer/manual-approval as the approval step before applying.
