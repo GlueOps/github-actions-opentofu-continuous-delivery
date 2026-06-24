@@ -53,7 +53,7 @@ jobs:
 - **Push** to `main` branch.
   * Will trigger an apply that will require a manual approval via github issues.
 - **Pull Request** events: opened, synchronized, reopened.
-  *  Pull requests only plan and will post a comment to the PR with the plan results.
+  *  Pull requests only plan and (by default) post a sticky comment to the PR linking to the full plan. See [Viewing the plan](#viewing-the-plan).
 
 ## Job Configuration
 - **Concurrency**: Limits concurrent runs to prevent overlapping runs.
@@ -64,10 +64,19 @@ GitHub comments are capped at ~64 KB, so posting the plan inline truncates large
 
 - The full, human-readable plan is rendered to the run's **job summary** page (browser-viewable, searchable, no download). The summary has a ~1 MiB limit (16× the comment limit).
 - The full plan is always uploaded as a downloadable **artifact** named `tofu-plan` (no practical size limit), so it is accessible even for plans larger than the summary limit.
-- On pull requests, a single sticky comment is posted (and updated in place on each push) linking to the job summary and the artifact. This is enabled by default and controlled by `add_github_comment` (set it to `false` to disable). The upstream dflook plan comment is always disabled, since it truncates large plans.
+- On pull requests, a single sticky comment is posted (and updated in place on each push) linking to the run summary page (where the plan is rendered) and to the artifact. This is enabled by default and controlled by `add_github_comment` (set it to `false` to disable). The upstream dflook plan comment is always disabled, since it truncates large plans.
 - On an apply to `main` that requires manual approval, the approval issue created by [manual-approval](https://github.com/trstringer/manual-approval) links to the same plan.
 
 Because the plan is published before the approval gate, you can review the complete plan and then approve or deny — no need to cancel and re-run.
+
+## Permissions
+
+Most repositories run with the default `GITHUB_TOKEN` permissions, which are sufficient. If you restrict permissions in your workflow, the action needs:
+
+- `issues: write` — required for the manual approval gate on `main` (creates and reads the approval issue).
+- `pull-requests: write` — required only when `add_github_comment` is enabled (default), to post the sticky PR comment.
+
+The job summary and the `tofu-plan` artifact require **no** `GITHUB_TOKEN` permissions (the artifact uses the runner's separate token).
 
 ## Inputs
 
