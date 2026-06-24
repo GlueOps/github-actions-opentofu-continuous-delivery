@@ -19,9 +19,13 @@ permissions:
   contents: read
   pull-requests: write
 
+# No GITHUB_TOKEN is exported here on purpose: this workflow runs on
+# pull_request (incl. forks) and executes the PR's own test/main.tf via
+# `tofu plan`. Exposing a repo token to that untrusted code would be a leak,
+# and the local-backend null fixture needs no token. The action's own steps
+# that need a token use github.token internally.
 env:
   OPENTOFU_VERSION: "1.8.5"
-  TERRAFORM_ACTIONS_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
   smoke:
@@ -49,8 +53,10 @@ jobs:
           test "${{ steps.tofu.outputs.changes }}" = "true"
           test "${{ steps.tofu.outputs.to_add }}" = "1"
 
+      # Only same-repo PRs get a writable token; fork PRs get a read-only token,
+      # so the action intentionally skips the comment (no comment to assert).
       - name: Assert sticky plan comment was posted
-        if: github.event_name == 'pull_request'
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
         env:
           GH_TOKEN: ${{ github.token }}
         shell: bash

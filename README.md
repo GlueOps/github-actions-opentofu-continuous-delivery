@@ -34,6 +34,10 @@ on:
 jobs:
   terraform-action:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read        # checkout
+      issues: write         # manual approval gate on main
+      pull-requests: write  # sticky plan comment on PRs (add_github_comment)
     concurrency:
       group: limit-concurrency-do-not-remove-this
       cancel-in-progress: false
@@ -118,8 +122,8 @@ Beyond `contents: read` for checkout, the job summary and the `tofu-plan` artifa
 | `to_change` | The number of resources that would be changed by this plan |
 | `to_destroy` | The number of resources that would be destroyed by this plan |
 | `plan_path` | Path to the file containing the generated plan in an opaque binary format |
-| `text_plan_path` | Path to the file containing the generated plan in human-readable format |
-| `json_plan_path` | Path to the file containing the generated plan in JSON format |
+| `text_plan_path` | Path to the file containing the generated plan in human-readable format. Not set if the backend is `remote` and `auto_approve` is `true` |
+| `json_plan_path` | Path to the file containing the generated plan in JSON format. Not set if the backend is `remote` |
 | `run_id` | The remote run ID if using `remote` or `cloud` backend in remote execution mode |
 
 ## Secrets and Environment Variables

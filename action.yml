@@ -25,6 +25,7 @@ inputs:
   variables:
     description: Variable definitions
     required: false
+    default: ""
   var_file:
     description: List of var file paths, one per line
     required: false
@@ -97,7 +98,7 @@ outputs:
     value: ${{ steps.plan.outputs.run_id }}
   failure-reason:
     description: The reason for the build failure. May be `apply-failed` or `plan-changed`.
-    value: ${{ steps.plan.outputs.failure-reason || steps.apply.outputs.failure-reason }}
+    value: ${{ steps.apply.outputs.failure-reason }}
 
 
 runs:
