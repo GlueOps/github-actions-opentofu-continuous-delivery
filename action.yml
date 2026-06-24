@@ -57,7 +57,7 @@ inputs:
     required: false
     default: "true"
   enable_slack_notification_for_approval:
-    description: Enable or Disable slack notifications
+    description: "DEPRECATED and ignored. Slack notifications have been removed entirely. This input is retained only to avoid breaking existing workflows that still set it."
     required: false
     default: "true"
   ENABLE_DANGEROUS_AUTO_APPLY_MODE:
@@ -93,6 +93,14 @@ runs:
   steps:
     - name: Checkout
       uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+
+    # Slack notifications were removed entirely. The `enable_slack_notification_for_approval`
+    # input is kept as a no-op so existing workflows that still set it don't break.
+    - name: Slack notifications removed (deprecation notice)
+      if: inputs.enable_slack_notification_for_approval != ''
+      shell: bash
+      run: |
+        echo "::warning title=Slack notifications removed::Slack notifications have been removed from this action. The 'enable_slack_notification_for_approval' input is now ignored and retained only for backward compatibility. Please remove it from your workflow."
 
     - name: tofu fmt
       uses: dflook/tofu-fmt-check@1ae8a83029b8ad8e6c6a12834e0d3d9cd0e34d5f # v2.2.3
@@ -143,29 +151,32 @@ runs:
         destroy: ${{ inputs.destroy }}
         add_github_comment:  ${{ inputs.add_github_comment }}
 
+    # Publishes the full, human-readable plan to the run's job summary page.
+    # GitHub PR/issue/commit comments are capped at 65,536 characters, so large
+    # plans get truncated in the PR comment and the approval issue. The job
+    # summary has a ~1 MiB limit and renders in the browser, so approvers can
+    # read the full plan without downloading anything or re-running the workflow.
+    - name: Publish full plan to job summary
+      if: steps.plan.outputs.text_plan_path != ''
+      shell: bash
+      run: |
+        {
+          echo '## OpenTofu Plan'
+          echo '```'
+          cat "${{ steps.plan.outputs.text_plan_path }}"
+          echo '```'
+        } >> "$GITHUB_STEP_SUMMARY"
 
-    
-    - name: Notify in Slack about Approving/Denying to continue workflow
-      if: github.ref_name == 'main' && steps.plan.outputs.changes == 'true' && inputs.enable_slack_notification_for_approval == 'true' && github.event_name != 'pull_request' && inputs.ENABLE_DANGEROUS_AUTO_APPLY_MODE == 'false' 
-      uses: slackapi/slack-github-action@91efab103c0de0a537f72a35f6b8cda0ee76bf0a # v2.1.1
+    # Uploads the full text plan as a downloadable artifact. The job summary
+    # above covers the common case, but artifacts have no practical size limit
+    # and never truncate, so this is the fallback for very large plans (>1 MiB).
+    - name: Upload full plan as artifact
+      id: upload_plan
+      if: steps.plan.outputs.text_plan_path != ''
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
       with:
-        webhook-type: webhook-trigger
-        payload: |
-           {
-                "attachments": [
-                    {
-                        "color": "#FFA500",
-                        "author_name": ":link: OpenTofu - ${{ github.event.repository.name }} - Job Details",
-                        "author_link": "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}",
-                        "title": "https://github.com/${{ github.repository }}",
-                        "title_link": "https://github.com/${{ github.repository }}",
-                        "text": ":raising_hand: Approval Required: https://github.com/${{ github.repository }}/issues"
-                    }
-                ]
-            }
-      env:
-        SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
-
+        name: tofu-plan
+        path: ${{ steps.plan.outputs.text_plan_path }}
 
     ## IMPORTANT
     ## DO NOT REMOVE THIS MANUAL APPROVAL STEP UNLESS YOU WANT AUTO APPLY WITHOUT ANY APPROVALS.
@@ -177,7 +188,11 @@ runs:
         approvers: ${{ github.actor }}
         minimum-approvals: 1
         issue-title: "Approve or Deny tofu apply"
-        issue-body: "Approve or Deny tofu apply"
+        issue-body: |
+          Approve or Deny tofu apply.
+
+          - Full plan (rendered in browser, job summary): https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          - Full plan (downloadable artifact): ${{ steps.upload_plan.outputs.artifact-url }}
         exclude-workflow-initiator-as-approver: false
 
     - name: tofu apply
@@ -196,46 +211,3 @@ runs:
         target: ${{ inputs.target }}
         replace: ${{ inputs.replace }}
         destroy: ${{ inputs.destroy }}
-
-    - name: Notify on Success
-      if: always() && success() && inputs.enable_slack_notification_for_approval == 'true'
-      uses: slackapi/slack-github-action@91efab103c0de0a537f72a35f6b8cda0ee76bf0a # v2.1.1
-      with:
-        webhook-type: webhook-trigger
-        payload: |
-           {
-                "attachments": [
-                    {
-                        "color": "#36a64f",
-                        "author_name": ":link: OpenTofu - ${{ github.event.repository.name }} - Job Details",
-                        "author_link": "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}",
-                        "title": "https://github.com/${{ github.repository }}",
-                        "title_link": "https://github.com/${{ github.repository }}",
-                        "text": ":large_green_circle: SUCCESS :large_green_circle:"
-                    }
-                ]
-            }
-      env:
-        SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
-
-
-    - name: Notify on Failure
-      if: always() && failure() && inputs.enable_slack_notification_for_approval == 'true'
-      uses: slackapi/slack-github-action@91efab103c0de0a537f72a35f6b8cda0ee76bf0a # v2.1.1
-      with:
-        webhook-type: webhook-trigger
-        payload: |
-           {
-                "attachments": [
-                    {
-                        "color": "#FF0000",
-                        "author_name": ":link: OpenTofu - ${{ github.event.repository.name }} - Job Details",
-                        "author_link": "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}",
-                        "title": "https://github.com/${{ github.repository }}",
-                        "title_link": "https://github.com/${{ github.repository }}",
-                        "text": ":rotating_light: FAILURE :rotating_light:"
-                    }
-                ]
-            }
-      env:
-        SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
