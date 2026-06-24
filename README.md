@@ -24,7 +24,7 @@ on:
     branches:
       - main # This action has defaults that assume it will only apply off of main. It will not apply unless you "approve" the github issue per manual-approval GHA.
   pull_request:
-    types: [opened, synchronize, reopened] # If you open a PR it'll run a plan and comment the plan on a PR
+    types: [opened, synchronize, reopened] # If you open a PR it'll run a plan and post a sticky comment linking to the full plan
   workflow_dispatch:
   # schedule:
   #   - cron: '0 16 * * *' # Used for drift detection. However with the manual approval, if drift is found you may burn through your CI requirements while the manual approval actions waits for you to approve or deny the apply.
@@ -69,7 +69,7 @@ GitHub comments are capped at ~64 KB, so posting the plan inline truncates large
 
 > **Note:** All three surfaces depend on a human-readable plan being produced. For `remote`/`cloud` backends running in auto-approve mode, OpenTofu does not emit a text plan (`text_plan_path` is unset), so the summary, artifact, and comment are skipped.
 
-> **When each surface appears:** Pull request runs get all three (job summary, artifact, and the sticky comment). Push-to-`main`, `workflow_dispatch`, and other non-PR runs do **not** post a PR comment (there is no PR to comment on) — the plan is on the job summary and artifact, and on `main` the manual-approval issue links to it. If `ENABLE_DANGEROUS_AUTO_APPLY_MODE` is enabled, the approval issue is skipped too, leaving the job summary and artifact as the surfaces.
+> **When each surface appears:** Pull request runs get the job summary and artifact, plus the sticky comment unless `add_github_comment: false`. Push-to-`main`, `workflow_dispatch`, and other non-PR runs do **not** post a PR comment (there is no PR to comment on) — the plan is on the job summary and artifact, and on `main` the manual-approval issue links to it. If `ENABLE_DANGEROUS_AUTO_APPLY_MODE` is enabled, the approval issue is skipped too, leaving the job summary and artifact as the surfaces.
 
 > **⚠️ Sensitive data:** A plan can contain secrets in cleartext — any provider/resource attribute not explicitly marked `sensitive` (connection strings, IAM policy documents, tokens, etc.) is rendered verbatim. The job summary and the `tofu-plan` artifact are visible to anyone with read/Actions access to the repository, and the artifact is kept per your repository's default artifact retention. Treat them accordingly: restrict repository access and/or lower the artifact retention if your plans can expose sensitive values.
 

@@ -175,6 +175,9 @@ runs:
           echo '## OpenTofu Plan'
           echo "$fence"
           cat "$PLAN_PATH"
+          # Ensure the closing fence is on its own line even if the plan file
+          # has no trailing newline (otherwise the code block never closes).
+          printf '\n'
           echo "$fence"
         } >> "$GITHUB_STEP_SUMMARY"
 
@@ -213,7 +216,9 @@ runs:
             // eagerly fetching every comment (faster on large PRs).
             let existing;
             for await (const { data: page } of github.paginate.iterator(github.rest.issues.listComments, { owner, repo, issue_number, per_page: 100 })) {
-              existing = page.find(c => c.body && c.body.includes(marker));
+              // Require the bot to own the comment so a human-planted marker
+              // can't redirect our update onto their comment.
+              existing = page.find(c => c.body && c.body.includes(marker) && c.user && c.user.type === 'Bot');
               if (existing) break;
             }
             if (existing) {
@@ -222,11 +227,11 @@ runs:
               await github.rest.issues.createComment({ owner, repo, issue_number, body });
             }
           } catch (e) {
-            // Don't fail the run just because we couldn't comment. This is expected
-            // for PRs opened from forks, where GITHUB_TOKEN is read-only regardless
-            // of the workflow's permissions. The plan is still on the job summary
-            // and the tofu-plan artifact.
-            core.warning(`Could not post the plan comment (expected for fork PRs with a read-only token): ${e.message}`);
+            // Don't fail the run just because we couldn't comment. Common causes:
+            // a PR from a fork (GITHUB_TOKEN is read-only regardless of the
+            // workflow's permissions), or a same-repo run missing 'pull-requests:
+            // write'. The plan is still on the job summary and the tofu-plan artifact.
+            core.warning(`Could not post the plan comment; the plan is still on the job summary and the tofu-plan artifact. Expected for fork PRs (read-only token); for same-repo PRs ensure the workflow grants 'pull-requests: write'. Error: ${e.message}`);
           }
       env:
         SUMMARY_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
