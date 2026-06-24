@@ -60,12 +60,14 @@ jobs:
 
 ## Viewing the plan
 
-The plan is posted as a PR/commit comment via `add_github_comment`. GitHub comments are capped at ~64 KB, so large plans get truncated there. To make the full plan available regardless of size, every run also:
+GitHub comments are capped at ~64 KB, so posting the plan inline truncates large plans. Instead, the full plan is always made available without that limit, and every surface just **links** to it consistently:
 
-- Renders the full, human-readable plan to the **job summary** page of the run (browser-viewable, searchable, no download).
-- Uploads the full plan as a downloadable **artifact** named `tofu-plan` (no practical size limit; fallback for very large plans).
+- The full, human-readable plan is rendered to the run's **job summary** page (browser-viewable, searchable, no download). The summary has a ~1 MiB limit (16× the comment limit).
+- The full plan is always uploaded as a downloadable **artifact** named `tofu-plan` (no practical size limit), so it is accessible even for plans larger than the summary limit.
+- On pull requests, a single sticky comment is posted (and updated in place on each push) linking to the job summary and the artifact. This is controlled by `add_github_comment`.
+- On an apply to `main` that requires manual approval, the approval issue created by [manual-approval](https://github.com/trstringer/manual-approval) links to the same plan.
 
-When an apply on `main` requires manual approval, the approval issue created by [manual-approval](https://github.com/trstringer/manual-approval) links directly to both the job summary and the artifact, so you can review the complete plan before approving — no need to cancel and re-run.
+Because the plan is published before the approval gate, you can review the complete plan and then approve or deny — no need to cancel and re-run.
 
 ## Inputs
 
@@ -83,7 +85,7 @@ When an apply on `main` requires manual approval, the approval issue created by 
 | `replace` | List of resources to replace if an update is required, one per line | ❌ | `""` |
 | `destroy` | Create and apply a plan to destroy all resources | ❌ | `false` |
 | `backend_type` | The backend plugin name | ✅ | _None_ |
-| `add_github_comment` | Add the plan to a GitHub PR | ❌ | `true` |
+| `add_github_comment` | Post a sticky comment on the PR linking to the full plan (job summary / artifact). | ❌ | `true` |
 | `enable_slack_notification_for_approval` | **Deprecated and ignored.** Slack notifications have been removed; retained only for backward compatibility. | ❌ | `true` |
 | `ENABLE_DANGEROUS_AUTO_APPLY_MODE` | If enabled, any changes including Destroy, Apply, and Replace will be automatically approved (skips the manual approval step). | ❌ | `false` |
 
