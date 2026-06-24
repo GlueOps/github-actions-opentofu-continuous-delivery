@@ -68,10 +68,12 @@ jobs:
 
 GitHub comments are capped at ~64 KB, so posting the plan inline truncates large plans. Instead, the full plan is made available without that limit, and every surface just **links** to it consistently:
 
-- The full, human-readable plan is rendered to the run's **job summary** page (browser-viewable, searchable, no download). The summary has a ~1 MiB limit (16× the comment limit).
+- The full, human-readable plan is rendered to the run's **job summary** page (browser-viewable, searchable, no download). The summary has a ~1 MiB limit (16× the comment limit). Note that GitHub only renders the job summary **after the job finishes**.
 - The full plan is uploaded as a downloadable **artifact** named `tofu-plan` (no practical size limit), so it is accessible even for plans larger than the summary limit.
 - On pull requests, a single sticky comment is posted (and updated in place on each push) linking to the run summary page (where the plan is rendered) and to the artifact. This is enabled by default and controlled by `add_github_comment` (set it to `false` to disable). The upstream dflook plan comment is always disabled, since it truncates large plans.
 - On an apply to `main` that requires manual approval, the approval issue created by [manual-approval](https://github.com/trstringer/manual-approval) links to the same plan.
+
+> **Reviewing before approval:** because the job summary only renders after the job finishes, it is **not** viewable while the run is paused at the manual-approval gate on `main`. To review the plan before approving, download the `tofu-plan` artifact (available during the pause) or expand the `tofu plan` step in the live job logs.
 
 > **Note:** All three surfaces depend on a human-readable plan being produced. For `remote`/`cloud` backends running in auto-approve mode, OpenTofu does not emit a text plan (`text_plan_path` is unset), so the summary, artifact, and comment are skipped.
 
