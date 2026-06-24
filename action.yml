@@ -55,7 +55,7 @@ inputs:
   add_github_comment:
     description: Post a sticky comment on the PR linking to the full plan (job summary / artifact)
     required: false
-    default: "true"
+    default: "false"
   enable_slack_notification_for_approval:
     description: "DEPRECATED and ignored. Slack notifications have been removed entirely. This input is retained only to avoid breaking existing workflows that still set it."
     required: false
