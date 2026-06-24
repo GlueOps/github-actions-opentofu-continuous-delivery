@@ -64,7 +64,7 @@ GitHub comments are capped at ~64 KB, so posting the plan inline truncates large
 
 - The full, human-readable plan is rendered to the run's **job summary** page (browser-viewable, searchable, no download). The summary has a ~1 MiB limit (16× the comment limit).
 - The full plan is always uploaded as a downloadable **artifact** named `tofu-plan` (no practical size limit), so it is accessible even for plans larger than the summary limit.
-- On pull requests, a single sticky comment can be posted (and updated in place on each push) linking to the job summary and the artifact. This is controlled by `add_github_comment` and is **disabled by default** (the plan is already on the job summary / artifact); set it to `true` to enable.
+- On pull requests, a single sticky comment is posted (and updated in place on each push) linking to the job summary and the artifact. This is enabled by default and controlled by `add_github_comment` (set it to `false` to disable). The upstream dflook plan comment is always disabled, since it truncates large plans.
 - On an apply to `main` that requires manual approval, the approval issue created by [manual-approval](https://github.com/trstringer/manual-approval) links to the same plan.
 
 Because the plan is published before the approval gate, you can review the complete plan and then approve or deny — no need to cancel and re-run.
@@ -85,7 +85,7 @@ Because the plan is published before the approval gate, you can review the compl
 | `replace` | List of resources to replace if an update is required, one per line | ❌ | `""` |
 | `destroy` | Create and apply a plan to destroy all resources | ❌ | `false` |
 | `backend_type` | The backend plugin name | ✅ | _None_ |
-| `add_github_comment` | Post a sticky comment on the PR linking to the full plan (job summary / artifact). | ❌ | `false` |
+| `add_github_comment` | Post a sticky comment on the PR linking to the full plan (job summary / artifact). | ❌ | `true` |
 | `enable_slack_notification_for_approval` | **Deprecated and ignored.** Slack notifications have been removed; retained only for backward compatibility. | ❌ | `true` |
 | `ENABLE_DANGEROUS_AUTO_APPLY_MODE` | If enabled, any changes including Destroy, Apply, and Replace will be automatically approved (skips the manual approval step). | ❌ | `false` |
 
