@@ -70,24 +70,34 @@ inputs:
 outputs:
   tofu:
     description: The tofu version used by the configuration
+    value: ${{ steps.Versions.outputs.tofu }}
   changes:
     description: If the generated plan would update any resources or outputs this is set to `true`, otherwise it's set to `false`.
+    value: ${{ steps.plan.outputs.changes }}
   to_add:
     description: The number of resources that would be added by this plan
+    value: ${{ steps.plan.outputs.to_add }}
   to_change:
     description: The number of resources that would be changed by this plan
+    value: ${{ steps.plan.outputs.to_change }}
   to_destroy:
     description: The number of resources that would be destroyed by this plan
+    value: ${{ steps.plan.outputs.to_destroy }}
   plan_path:
     description: Path to a file in the workspace containing the generated plan in an opaque binary format.
+    value: ${{ steps.plan.outputs.plan_path }}
   text_plan_path:
     description: Path to a file in the workspace containing the generated plan in human readable format. This won't be set if the backend type is `remote` and `auto_approve` is `true`
+    value: ${{ steps.plan.outputs.text_plan_path }}
   json_plan_path:
     description: Path to a file in the workspace containing the generated plan in JSON format. This won't be set if the backend type is `remote`.
+    value: ${{ steps.plan.outputs.json_plan_path }}
   run_id:
     description: If the root module uses the `remote` or `cloud` backend in remote execution mode, this output will be set to the remote run id.
+    value: ${{ steps.plan.outputs.run_id }}
   failure-reason:
     description: The reason for the build failure. May be `apply-failed` or `plan-changed`.
+    value: ${{ steps.plan.outputs.failure-reason || steps.apply.outputs.failure-reason }}
 
 
 runs:
@@ -255,6 +265,7 @@ runs:
         exclude-workflow-initiator-as-approver: false
 
     - name: tofu apply
+      id: apply
       if: github.ref_name == 'main' && steps.plan.outputs.changes == 'true'
       uses: dflook/tofu-apply@c254eb5b2e48978c05587373100d26b604c2182d # v2.2.3
       with:
