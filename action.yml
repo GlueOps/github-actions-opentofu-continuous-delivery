@@ -193,7 +193,7 @@ runs:
             marker,
             '## OpenTofu Plan',
             '',
-            `- Full plan (rendered in browser, job summary): ${process.env.SUMMARY_URL}`,
+            `- Full plan (rendered in browser, run summary): ${process.env.SUMMARY_URL}`,
             `- Full plan (downloadable artifact): ${process.env.ARTIFACT_URL}`,
           ].join('\n');
           const { owner, repo } = context.repo;
@@ -206,7 +206,7 @@ runs:
             await github.rest.issues.createComment({ owner, repo, issue_number, body });
           }
       env:
-        SUMMARY_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        SUMMARY_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         ARTIFACT_URL: ${{ steps.upload_plan.outputs.artifact-url }}
 
     ## IMPORTANT
@@ -222,7 +222,7 @@ runs:
         issue-body: |
           Approve or Deny tofu apply.
 
-          - Full plan (rendered in browser, job summary): https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          - Full plan (rendered in browser, run summary): ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           - Full plan (downloadable artifact): ${{ steps.upload_plan.outputs.artifact-url }}
         exclude-workflow-initiator-as-approver: false
 
