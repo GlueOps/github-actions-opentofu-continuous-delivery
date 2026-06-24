@@ -60,12 +60,14 @@ jobs:
 
 ## Viewing the plan
 
-GitHub comments are capped at ~64 KB, so posting the plan inline truncates large plans. Instead, the full plan is always made available without that limit, and every surface just **links** to it consistently:
+GitHub comments are capped at ~64 KB, so posting the plan inline truncates large plans. Instead, the full plan is made available without that limit, and every surface just **links** to it consistently:
 
 - The full, human-readable plan is rendered to the run's **job summary** page (browser-viewable, searchable, no download). The summary has a ~1 MiB limit (16× the comment limit).
-- The full plan is always uploaded as a downloadable **artifact** named `tofu-plan` (no practical size limit), so it is accessible even for plans larger than the summary limit.
+- The full plan is uploaded as a downloadable **artifact** named `tofu-plan` (no practical size limit), so it is accessible even for plans larger than the summary limit.
 - On pull requests, a single sticky comment is posted (and updated in place on each push) linking to the run summary page (where the plan is rendered) and to the artifact. This is enabled by default and controlled by `add_github_comment` (set it to `false` to disable). The upstream dflook plan comment is always disabled, since it truncates large plans.
 - On an apply to `main` that requires manual approval, the approval issue created by [manual-approval](https://github.com/trstringer/manual-approval) links to the same plan.
+
+> **Note:** All three surfaces depend on a human-readable plan being produced. For `remote`/`cloud` backends running in auto-approve mode, OpenTofu does not emit a text plan (`text_plan_path` is unset), so the summary, artifact, and comment are skipped.
 
 Because the plan is published before the approval gate, you can review the complete plan and then approve or deny — no need to cancel and re-run.
 
@@ -73,10 +75,11 @@ Because the plan is published before the approval gate, you can review the compl
 
 Most repositories run with the default `GITHUB_TOKEN` permissions, which are sufficient. If you restrict permissions in your workflow, the action needs:
 
+- `contents: read` — required for `actions/checkout` to fetch your configuration.
 - `issues: write` — required for the manual approval gate on `main` (creates and reads the approval issue).
-- `pull-requests: write` — required only when `add_github_comment` is enabled (default), to post the sticky PR comment.
+- `pull-requests: write` — required only when `add_github_comment` is enabled (default), to post the sticky PR comment. Note that PRs opened from forks always receive a read-only token regardless of this setting; in that case the comment is skipped with a warning (the plan is still on the job summary and artifact).
 
-The job summary and the `tofu-plan` artifact require **no** `GITHUB_TOKEN` permissions (the artifact uses the runner's separate token).
+Beyond `contents: read` for checkout, the job summary and the `tofu-plan` artifact need no `GITHUB_TOKEN` write permissions (the artifact upload uses the runner's separate token).
 
 ## Inputs
 
@@ -95,7 +98,7 @@ The job summary and the `tofu-plan` artifact require **no** `GITHUB_TOKEN` permi
 | `destroy` | Create and apply a plan to destroy all resources | ❌ | `false` |
 | `backend_type` | The backend plugin name | ✅ | _None_ |
 | `add_github_comment` | Post a sticky comment on the PR linking to the full plan (job summary / artifact). | ❌ | `true` |
-| `enable_slack_notification_for_approval` | **Deprecated and ignored.** Slack notifications have been removed; retained only for backward compatibility. | ❌ | `true` |
+| `enable_slack_notification_for_approval` | **Deprecated and ignored.** Slack notifications have been removed; retained only for backward compatibility. | ❌ | `""` |
 | `ENABLE_DANGEROUS_AUTO_APPLY_MODE` | If enabled, any changes including Destroy, Apply, and Replace will be automatically approved (skips the manual approval step). | ❌ | `false` |
 
 ## Outputs
