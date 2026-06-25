@@ -229,22 +229,24 @@ runs:
           printf '\n%s\n\n</details>\n' "$fence"
         }
 
-        # PR comment: header + link, plus the inline plan only if the whole fits.
-        { printf '%s\n## OpenTofu Plan\n\n%s\n' "$marker" "$link"; emit_plan; } > "${pr}.full"
+        # PR comment: link first (after the invisible marker), then header, plus
+        # the inline plan only if the whole body fits.
+        { printf '%s\n%s\n\n## OpenTofu Plan\n' "$marker" "$link"; emit_plan; } > "${pr}.full"
         if [ "$(wc -c < "${pr}.full")" -le "$max" ]; then
           mv "${pr}.full" "$pr"
         else
-          printf '%s\n## OpenTofu Plan\n\n%s\n' "$marker" "$link" > "$pr"
+          printf '%s\n%s\n\n## OpenTofu Plan\n\n_Plan too large to inline — use the download link above._\n' "$marker" "$link" > "$pr"
           rm -f "${pr}.full"
         fi
 
-        # Approval issue: preamble + link, plus the inline plan only if it all fits.
+        # Approval issue: link first, then the approve/deny context, plus the inline
+        # plan only if it all fits.
         preamble='Approve or Deny tofu apply. Review the plan before approving:'
-        { printf '%s\n\n%s\n' "$preamble" "$link"; emit_plan; } > "${iss}.full"
+        { printf '%s\n\n%s\n' "$link" "$preamble"; emit_plan; } > "${iss}.full"
         if [ "$(wc -c < "${iss}.full")" -le "$max" ]; then
           mv "${iss}.full" "$iss"
         else
-          printf '%s\n\n%s\n' "$preamble" "$link" > "$iss"
+          printf '%s\n\n%s\n\n_Plan too large to inline — use the download link above._\n' "$link" "$preamble" > "$iss"
           rm -f "${iss}.full"
         fi
 
