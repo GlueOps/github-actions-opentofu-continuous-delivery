@@ -272,9 +272,10 @@ runs:
             // eagerly fetching every comment (faster on large PRs).
             let existing;
             for await (const { data: page } of github.paginate.iterator(github.rest.issues.listComments, { owner, repo, issue_number, per_page: 100 })) {
-              // Require the bot to own the comment so a human-planted marker
-              // can't redirect our update onto their comment.
-              existing = page.find(c => c.body && c.body.includes(marker) && c.user && c.user.type === 'Bot');
+              // Require our own bot (github.token posts as github-actions[bot])
+              // to own the comment, so a human- or other-bot-planted marker can't
+              // redirect our update onto their comment.
+              existing = page.find(c => c.body && c.body.includes(marker) && c.user && c.user.login === 'github-actions[bot]');
               if (existing) break;
             }
             if (existing) {
