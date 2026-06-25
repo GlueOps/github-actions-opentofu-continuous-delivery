@@ -231,8 +231,8 @@ runs:
             marker,
             '## OpenTofu Plan',
             '',
-            `- Full plan (rendered in browser, run summary): ${process.env.SUMMARY_URL}`,
-            `- Full plan (downloadable artifact): ${process.env.ARTIFACT_URL}`,
+            `- 📄 View the plan in the run summary: ${process.env.SUMMARY_URL}`,
+            `- ⬇️ Download the full plan (one click, tofu-plan.txt): ${process.env.ARTIFACT_URL}`,
           ].join('\n');
           const { owner, repo } = context.repo;
           const issue_number = context.issue.number;
@@ -273,10 +273,10 @@ runs:
         minimum-approvals: 1
         issue-title: "Approve or Deny tofu apply"
         issue-body: |
-          Approve or Deny tofu apply.
+          Approve or Deny tofu apply. Review the plan before approving:
 
-          - Full plan (rendered in browser, run summary): ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          - Full plan (downloadable artifact): ${{ steps.upload_plan.outputs.artifact-url }}
+          - ⬇️ Download the full plan (one click, tofu-plan.txt): ${{ steps.upload_plan.outputs.artifact-url }}
+          - 📄 Plan in the run summary (renders after the job finishes): ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         exclude-workflow-initiator-as-approver: false
 
     - name: tofu apply
