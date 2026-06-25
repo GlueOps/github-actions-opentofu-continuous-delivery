@@ -1,0 +1,92 @@
+name: Integration Test
+
+# Runs the action against a throwaway local-backend fixture (test/) so changes
+# are exercised early. The plan/artifact/comment path runs on every PR commit;
+# the apply path only runs on push to main (the action gates apply on main),
+# with auto-apply enabled so it never blocks on the approval issue.
+#
+# NOTE: the manual-approval path (issue-body-file-path) is intentionally NOT
+# covered — auto-apply skips the approval gate, and exercising it would block on
+# a human. That path is verified by review, not CI.
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  push:
+    branches: [main]
+
+# Each ref runs in isolation; superseded commits are cancelled to save minutes.
+concurrency:
+  group: integration-test-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: write
+
+# No GITHUB_TOKEN is exported here on purpose: this workflow runs on
+# pull_request (incl. forks) and executes the PR's own test/main.tf via
+# `tofu plan`. Exposing a repo token to that untrusted code would be a leak,
+# and the local-backend null fixture needs no token. The action's own steps
+# that need a token use github.token internally.
+env:
+  OPENTOFU_VERSION: "1.8.5"
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      # Required so the local action (uses: ./) is available to the runner.
+      - name: Checkout
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+
+      - name: Run action under test
+        id: tofu
+        uses: ./
+        with:
+          path: test
+          backend_type: local
+          add_github_comment: "true"
+          # Auto-apply so the apply path on main is not blocked by the approval
+          # issue. On PRs the action does not apply (ref is not main) regardless.
+          ENABLE_DANGEROUS_AUTO_APPLY_MODE: "true"
+
+      - name: Assert plan detected a change
+        shell: bash
+        run: |
+          echo "changes=${{ steps.tofu.outputs.changes }} to_add=${{ steps.tofu.outputs.to_add }}"
+          test "${{ steps.tofu.outputs.changes }}" = "true"
+          test "${{ steps.tofu.outputs.to_add }}" = "1"
+
+      # Only same-repo PRs get a writable token; fork PRs get a read-only token,
+      # so the action intentionally skips the comment (no comment to assert).
+      - name: Assert sticky plan comment was posted (with link + inlined plan)
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          pr='${{ github.event.pull_request.number }}'
+          body="$(gh api "repos/${{ github.repository }}/issues/${pr}/comments" --jq '.[] | select(.body | contains("glueops-opentofu-plan")) | .body')"
+          [ -n "$body" ] || { echo "::error::sticky plan comment (marker) not found on PR #${pr}"; exit 1; }
+          # Always-present artifact download link.
+          printf '%s' "$body" | grep -q 'tofu-plan.txt' || { echo "::error::comment missing the artifact download link"; exit 1; }
+          # Small fixture: the plan must be inlined (collapsible block + content).
+          printf '%s' "$body" | grep -q '<details>' || { echo "::error::comment did not inline the plan (<details> missing)"; exit 1; }
+          printf '%s' "$body" | grep -q 'null_resource' || { echo "::error::comment did not contain the inlined plan content"; exit 1; }
+
+  verify-artifact:
+    needs: smoke
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download plan artifact
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: tofu-plan.txt
+          path: plan
+
+      - name: Assert artifact contains the plan
+        shell: bash
+        run: |
+          ls -la plan
+          grep -rq 'null_resource' plan \
+            || { echo "::error::tofu-plan artifact did not contain the expected plan content"; exit 1; }
