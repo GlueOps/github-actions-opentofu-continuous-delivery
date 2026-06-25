@@ -66,12 +66,12 @@ jobs:
 
 ## Viewing the plan
 
-GitHub comments are capped at ~64 KB, so posting the plan inline truncates large plans. Instead, the full plan is made available without that limit, and every surface just **links** to it consistently:
+GitHub comments are capped at ~64 KB, so posting the plan inline truncates large plans. Instead, the full plan is made available without that limit, and the PR comment / approval issue link to it:
 
 - The full, human-readable plan is rendered to the run's **job summary** page (browser-viewable, searchable, no download). The summary has a ~1 MiB limit (16× the comment limit). Note that GitHub only renders the job summary **after the job finishes**.
 - The full plan is uploaded as a downloadable **artifact** named `tofu-plan.txt` (no practical size limit), so it is accessible even for plans larger than the summary limit. It is uploaded uncompressed (`archive: false`), so it downloads as a single `.txt` file with no zip to extract.
-- On pull requests, a single sticky comment is posted (and updated in place on each push) linking to the run summary page (where the plan is rendered) and to the artifact. This is enabled by default and controlled by `add_github_comment` (set it to `false` to disable). The upstream dflook plan comment is always disabled, since it truncates large plans.
-- On an apply to `main` that requires manual approval, the approval issue created by [manual-approval](https://github.com/trstringer/manual-approval) links to the same plan.
+- On pull requests, a single sticky comment is posted (and updated in place on each push) with a one-click link to download the plan artifact (`tofu-plan.txt`). This is enabled by default and controlled by `add_github_comment` (set it to `false` to disable). The upstream dflook plan comment is always disabled, since it truncates large plans.
+- On an apply to `main` that requires manual approval, the approval issue created by [manual-approval](https://github.com/trstringer/manual-approval) carries the same one-click link to download the plan artifact.
 
 > **Reviewing before approval:** because the job summary only renders after the job finishes, it is **not** viewable while the run is paused at the manual-approval gate on `main`. To review the plan before approving, download the `tofu-plan.txt` artifact (available during the pause) or expand the `tofu plan` step in the live job logs.
 
