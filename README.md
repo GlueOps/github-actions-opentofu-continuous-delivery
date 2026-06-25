@@ -68,7 +68,7 @@ jobs:
 
 GitHub issue and comment bodies are capped at **65,536 characters**, so a large plan can't always be posted inline. The action handles this as follows:
 
-- The full plan is **always** uploaded as a downloadable **artifact** named `tofu-plan.txt`. It is uploaded uncompressed (`archive: false`), so it downloads as a single `.txt` file with no zip to extract, and has no practical size limit.
+- Whenever a text plan is produced, the full plan is uploaded as a downloadable **artifact** named `tofu-plan.txt`. It is uploaded uncompressed (`archive: false`), so it downloads as a single `.txt` file with no zip to extract, and has no practical size limit. (See the note below for the one case where no text plan exists.)
 - On pull requests, a single sticky comment is posted (and updated in place on each push) that **always** has a link to download the artifact, and **also inlines the full plan** (in a collapsible block) **when the whole comment fits** under the 65,536-character limit. If the plan is too large to fit, the comment is link-only — it never includes a partial plan. Controlled by `add_github_comment` (default `true`; set `false` to disable). The upstream dflook plan comment is always disabled, since it truncates large plans.
 - On an apply to `main` that requires manual approval, [manual-approval](https://github.com/trstringer/manual-approval) posts the same content as a **comment on the approval issue**: always the artifact download link, plus the inlined plan when it fits.
 

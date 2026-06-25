@@ -163,8 +163,9 @@ runs:
         replace: ${{ inputs.replace }}
         destroy: ${{ inputs.destroy }}
         # Always disable dflook's own comment: GitHub comments are capped at
-        # ~64 KB, so large plans truncate. We post our own links-only PR comment
-        # below (gated on the add_github_comment input) instead.
+        # ~64 KB, so large plans truncate. We post our own PR comment below
+        # (plan inlined when it fits, else a download link), gated on the
+        # add_github_comment input.
         add_github_comment: "false"
 
     # Copy the plan to a clean, predictable filename. With archive: false the
@@ -181,9 +182,9 @@ runs:
         cp "$PLAN_PATH" "$dest"
         echo "path=$dest" >> "$GITHUB_OUTPUT"
 
-    # Always uploads the full plan as a single uncompressed file (archive: false),
-    # so it downloads as tofu-plan.txt directly with no zip to extract. Artifacts
-    # have no practical size limit, guaranteeing the full plan is always accessible.
+    # Uploads the full plan as a single uncompressed file (archive: false)
+    # whenever a text plan was produced, so it downloads as tofu-plan.txt with no
+    # zip to extract. Artifacts have no practical size limit.
     - name: Upload full plan as artifact
       id: upload_plan
       if: steps.plan.outputs.text_plan_path != ''
@@ -287,8 +288,8 @@ runs:
             // Don't fail the run just because we couldn't comment. Common causes:
             // a PR from a fork (GITHUB_TOKEN is read-only regardless of the
             // workflow's permissions), or a same-repo run missing 'pull-requests:
-            // write'. The plan is still on the tofu-plan artifact.
-            core.warning(`Could not post the plan comment; the plan is still on the tofu-plan artifact. Expected for fork PRs (read-only token); for same-repo PRs ensure the workflow grants 'pull-requests: write'. Error: ${e.message}`);
+            // write'. The plan is still on the tofu-plan.txt artifact.
+            core.warning(`Could not post the plan comment; the plan is still on the tofu-plan.txt artifact. Expected for fork PRs (read-only token); for same-repo PRs ensure the workflow grants 'pull-requests: write'. Error: ${e.message}`);
           }
       env:
         BODY_PATH: ${{ steps.bodies.outputs.pr_path }}
@@ -299,7 +300,7 @@ runs:
       if: github.ref_name == 'main' && steps.plan.outputs.changes == 'true' && inputs.ENABLE_DANGEROUS_AUTO_APPLY_MODE == 'false'
       uses: trstringer/manual-approval@74d99dff7380e3e4b122d4ededcbca2b6ce59367 # v1
       with:
-        secret: ${{ github.TOKEN }}
+        secret: ${{ github.token }}
         approvers: ${{ github.actor }}
         minimum-approvals: 1
         issue-title: "Approve or Deny tofu apply"
