@@ -167,31 +167,6 @@ runs:
         # below (gated on the add_github_comment input) instead.
         add_github_comment: "false"
 
-    # Publishes the full, human-readable plan to the run's job summary page so it
-    # can be read in the browser without downloading anything or re-running.
-    - name: Publish full plan to job summary
-      if: steps.plan.outputs.text_plan_path != ''
-      shell: bash
-      env:
-        # Pass via env (not inline ${{ }}) to avoid shell-injection from the value.
-        PLAN_PATH: ${{ steps.plan.outputs.text_plan_path }}
-      run: |
-        # Choose a code fence longer than the longest run of backticks in the
-        # plan, so a plan line that itself contains ``` cannot close the block.
-        longest=$(grep -oE '`+' "$PLAN_PATH" | awk '{ if (length > m) m = length } END { print m+0 }' || true)
-        len=3
-        if [ "${longest:-0}" -ge 3 ]; then len=$((longest + 1)); fi
-        fence=$(printf '%*s' "$len" '' | tr ' ' '`')
-        {
-          echo '## OpenTofu Plan'
-          echo "$fence"
-          cat "$PLAN_PATH"
-          # Ensure the closing fence is on its own line even if the plan file
-          # has no trailing newline (otherwise the code block never closes).
-          printf '\n'
-          echo "$fence"
-        } >> "$GITHUB_STEP_SUMMARY"
-
     # Copy the plan to a clean, predictable filename. With archive: false the
     # uploaded file's name becomes the artifact name (the name: input is ignored),
     # so we set it here. Path is passed via env to avoid shell injection.
@@ -217,6 +192,65 @@ runs:
         path: ${{ steps.stage_plan.outputs.path }}
         archive: false
 
+    # Builds the PR-comment and approval-issue bodies: always a one-click link to
+    # the artifact, plus the full plan inlined ONLY when the whole body stays under
+    # GitHub's 65,536-char body limit (otherwise link-only — never a partial plan).
+    - name: Build plan comment and approval issue bodies
+      id: bodies
+      if: steps.plan.outputs.text_plan_path != ''
+      shell: bash
+      env:
+        PLAN_PATH: ${{ steps.plan.outputs.text_plan_path }}
+        ARTIFACT_URL: ${{ steps.upload_plan.outputs.artifact-url }}
+      run: |
+        # GitHub issue/comment bodies are capped at 65,536 characters. Stay under
+        # it with margin; byte count is a safe proxy (UTF-8 bytes >= characters).
+        max=64000
+        marker='<!-- glueops-opentofu-plan -->'
+        link="⬇️ Download the full plan (one click, tofu-plan.txt): ${ARTIFACT_URL}"
+
+        # Backtick-safe fence longer than the longest run of backticks in the plan.
+        longest=$(grep -oE '`+' "$PLAN_PATH" | awk '{ if (length > m) m = length } END { print m+0 }' || true)
+        len=3
+        if [ "${longest:-0}" -ge 3 ]; then len=$((longest + 1)); fi
+        fence=$(printf '%*s' "$len" '' | tr ' ' '`')
+
+        # github-script (Node) reads the PR body from RUNNER_TEMP; manual-approval
+        # (a Docker action) can only read files under the workspace, so the issue
+        # body lives there and is passed as a path relative to /github/workspace.
+        pr="${RUNNER_TEMP}/glueops_pr_comment.md"
+        iss_rel='.glueops_approval_issue.md'
+        iss="${GITHUB_WORKSPACE}/${iss_rel}"
+
+        emit_plan() {
+          printf '\n<details><summary>Show plan</summary>\n\n%s\n' "$fence"
+          cat "$PLAN_PATH"
+          # Force a newline so the closing fence is on its own line.
+          printf '\n%s\n\n</details>\n' "$fence"
+        }
+
+        # PR comment: header + link, plus the inline plan only if the whole fits.
+        { printf '%s\n## OpenTofu Plan\n\n%s\n' "$marker" "$link"; emit_plan; } > "${pr}.full"
+        if [ "$(wc -c < "${pr}.full")" -le "$max" ]; then
+          mv "${pr}.full" "$pr"
+        else
+          printf '%s\n## OpenTofu Plan\n\n%s\n' "$marker" "$link" > "$pr"
+          rm -f "${pr}.full"
+        fi
+
+        # Approval issue: preamble + link, plus the inline plan only if it all fits.
+        preamble='Approve or Deny tofu apply. Review the plan before approving:'
+        { printf '%s\n\n%s\n' "$preamble" "$link"; emit_plan; } > "${iss}.full"
+        if [ "$(wc -c < "${iss}.full")" -le "$max" ]; then
+          mv "${iss}.full" "$iss"
+        else
+          printf '%s\n\n%s\n' "$preamble" "$link" > "$iss"
+          rm -f "${iss}.full"
+        fi
+
+        echo "pr_path=$pr" >> "$GITHUB_OUTPUT"
+        echo "issue_relpath=$iss_rel" >> "$GITHUB_OUTPUT"
+
     # Posts (or updates) a single sticky PR comment linking to the full plan.
     # Replaces dflook's inline comment, which truncates large plans. Gated on
     # add_github_comment so consumers can still turn the PR comment off.
@@ -226,13 +260,9 @@ runs:
       with:
         github-token: ${{ github.token }}
         script: |
+          const fs = require('fs');
           const marker = '<!-- glueops-opentofu-plan -->';
-          const body = [
-            marker,
-            '## OpenTofu Plan',
-            '',
-            `⬇️ Download the full plan (one click, tofu-plan.txt): ${process.env.ARTIFACT_URL}`,
-          ].join('\n');
+          const body = fs.readFileSync(process.env.BODY_PATH, 'utf8');
           const { owner, repo } = context.repo;
           const issue_number = context.issue.number;
           try {
@@ -254,11 +284,11 @@ runs:
             // Don't fail the run just because we couldn't comment. Common causes:
             // a PR from a fork (GITHUB_TOKEN is read-only regardless of the
             // workflow's permissions), or a same-repo run missing 'pull-requests:
-            // write'. The plan is still on the job summary and the tofu-plan artifact.
-            core.warning(`Could not post the plan comment; the plan is still on the job summary and the tofu-plan artifact. Expected for fork PRs (read-only token); for same-repo PRs ensure the workflow grants 'pull-requests: write'. Error: ${e.message}`);
+            // write'. The plan is still on the tofu-plan artifact.
+            core.warning(`Could not post the plan comment; the plan is still on the tofu-plan artifact. Expected for fork PRs (read-only token); for same-repo PRs ensure the workflow grants 'pull-requests: write'. Error: ${e.message}`);
           }
       env:
-        ARTIFACT_URL: ${{ steps.upload_plan.outputs.artifact-url }}
+        BODY_PATH: ${{ steps.bodies.outputs.pr_path }}
 
     ## IMPORTANT
     ## DO NOT REMOVE THIS MANUAL APPROVAL STEP UNLESS YOU WANT AUTO APPLY WITHOUT ANY APPROVALS.
@@ -270,10 +300,11 @@ runs:
         approvers: ${{ github.actor }}
         minimum-approvals: 1
         issue-title: "Approve or Deny tofu apply"
-        issue-body: |
-          Approve or Deny tofu apply. Review the plan before approving:
-
-          ⬇️ Download the full plan (one click, tofu-plan.txt): ${{ steps.upload_plan.outputs.artifact-url }}
+        # Body is built by the "Build plan comment and approval issue bodies" step
+        # (link always, plus the inline plan when it fits). issue-body is the
+        # fallback used only when no text plan exists (issue-body-file-path empty).
+        issue-body: "Approve or Deny tofu apply."
+        issue-body-file-path: ${{ steps.bodies.outputs.issue_relpath }}
         exclude-workflow-initiator-as-approver: false
 
     - name: tofu apply

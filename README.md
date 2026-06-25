@@ -66,22 +66,17 @@ jobs:
 
 ## Viewing the plan
 
-GitHub comments are capped at ~64 KB, so posting the plan inline truncates large plans. Instead, the full plan is made available without that limit, and the PR comment / approval issue link to it:
+GitHub issue and comment bodies are capped at **65,536 characters**, so a large plan can't always be posted inline. The action handles this as follows:
 
-- The full, human-readable plan is rendered to the run's **job summary** page (browser-viewable, searchable, no download). The summary has a ~1 MiB limit (16× the comment limit). Note that GitHub only renders the job summary **after the job finishes**.
-- The full plan is uploaded as a downloadable **artifact** named `tofu-plan.txt` (no practical size limit), so it is accessible even for plans larger than the summary limit. It is uploaded uncompressed (`archive: false`), so it downloads as a single `.txt` file with no zip to extract.
-- On pull requests, a single sticky comment is posted (and updated in place on each push) with a one-click link to download the plan artifact (`tofu-plan.txt`). This is enabled by default and controlled by `add_github_comment` (set it to `false` to disable). The upstream dflook plan comment is always disabled, since it truncates large plans.
-- On an apply to `main` that requires manual approval, the approval issue created by [manual-approval](https://github.com/trstringer/manual-approval) carries the same one-click link to download the plan artifact.
+- The full plan is **always** uploaded as a downloadable **artifact** named `tofu-plan.txt`. It is uploaded uncompressed (`archive: false`), so it downloads as a single `.txt` file with no zip to extract, and has no practical size limit.
+- On pull requests, a single sticky comment is posted (and updated in place on each push) that **always** has a one-click link to download the artifact, and **also inlines the full plan** (in a collapsible block) **when the whole comment fits** under the 65,536-character limit. If the plan is too large to fit, the comment is link-only — it never includes a partial plan. Controlled by `add_github_comment` (default `true`; set `false` to disable). The upstream dflook plan comment is always disabled, since it truncates large plans.
+- On an apply to `main` that requires manual approval, the approval issue created by [manual-approval](https://github.com/trstringer/manual-approval) does the same: always a one-click artifact download link, plus the inlined plan when it fits.
 
-> **Reviewing before approval:** because the job summary only renders after the job finishes, it is **not** viewable while the run is paused at the manual-approval gate on `main`. To review the plan before approving, download the `tofu-plan.txt` artifact (available during the pause) or expand the `tofu plan` step in the live job logs.
+> **Note:** Both surfaces depend on a human-readable plan being produced. For `remote`/`cloud` backends running in auto-approve mode, OpenTofu emits no text plan (`text_plan_path` is unset), so the artifact and the inline plan are skipped. Non-PR runs (`push` to `main`, `workflow_dispatch`) post no PR comment; the plan is on the artifact, and on `main` the approval issue links to it.
 
-> **Note:** All three surfaces depend on a human-readable plan being produced. For `remote`/`cloud` backends running in auto-approve mode, OpenTofu does not emit a text plan (`text_plan_path` is unset), so the summary, artifact, and comment are skipped.
+> **⚠️ Sensitive data:** A plan can contain secrets in cleartext — any provider/resource attribute not explicitly marked `sensitive` (connection strings, IAM policy documents, tokens, etc.) is rendered verbatim. The `tofu-plan.txt` artifact — and the plan inlined in the PR comment / approval issue when small enough — are visible to anyone with read/Actions access to the repository, and the artifact is kept per your repository's default artifact retention. Treat them accordingly: restrict repository access and/or lower the artifact retention if your plans can expose sensitive values.
 
-> **When each surface appears:** Pull request runs get the job summary and artifact, plus the sticky comment unless `add_github_comment: false`. Push-to-`main`, `workflow_dispatch`, and other non-PR runs do **not** post a PR comment (there is no PR to comment on) — the plan is on the job summary and artifact, and on `main` the manual-approval issue links to it. If `ENABLE_DANGEROUS_AUTO_APPLY_MODE` is enabled, the approval issue is skipped too, leaving the job summary and artifact as the surfaces.
-
-> **⚠️ Sensitive data:** A plan can contain secrets in cleartext — any provider/resource attribute not explicitly marked `sensitive` (connection strings, IAM policy documents, tokens, etc.) is rendered verbatim. The job summary and the `tofu-plan.txt` artifact are visible to anyone with read/Actions access to the repository, and the artifact is kept per your repository's default artifact retention. Treat them accordingly: restrict repository access and/or lower the artifact retention if your plans can expose sensitive values.
-
-Because the plan is published before the approval gate, you can review the complete plan and then approve or deny — no need to cancel and re-run.
+Because the artifact and the comment/issue are produced before the approval gate, you can review the plan and then approve or deny — no need to cancel and re-run.
 
 ## Permissions
 
@@ -89,9 +84,9 @@ Most repositories run with the default `GITHUB_TOKEN` permissions, which are suf
 
 - `contents: read` — required for `actions/checkout` to fetch your configuration.
 - `issues: write` — required for the manual approval gate on `main` (creates and reads the approval issue).
-- `pull-requests: write` — required only when `add_github_comment` is enabled (default), to post the sticky PR comment. Note that PRs opened from forks always receive a read-only token regardless of this setting; in that case the comment is skipped with a warning (the plan is still on the job summary and artifact).
+- `pull-requests: write` — required only when `add_github_comment` is enabled (default), to post the sticky PR comment. Note that PRs opened from forks always receive a read-only token regardless of this setting; in that case the comment is skipped with a warning (the plan is still on the artifact).
 
-Beyond `contents: read` for checkout, the job summary and the `tofu-plan.txt` artifact need no `GITHUB_TOKEN` write permissions (the artifact upload uses the runner's separate token).
+Beyond `contents: read` for checkout, the `tofu-plan.txt` artifact needs no `GITHUB_TOKEN` write permissions (the artifact upload uses the runner's separate token).
 
 ## Inputs
 
