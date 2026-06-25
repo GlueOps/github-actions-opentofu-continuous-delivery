@@ -1,9 +1,13 @@
 name: Integration Test
 
 # Runs the action against a throwaway local-backend fixture (test/) so changes
-# are exercised early. The plan/summary/artifact/comment path runs on every PR
-# commit; the apply path only runs on push to main (the action gates apply on
-# main), with auto-apply enabled so it never blocks on the approval issue.
+# are exercised early. The plan/artifact/comment path runs on every PR commit;
+# the apply path only runs on push to main (the action gates apply on main),
+# with auto-apply enabled so it never blocks on the approval issue.
+#
+# NOTE: the manual-approval path (issue-body-file-path) is intentionally NOT
+# covered — auto-apply skips the approval gate, and exercising it would block on
+# a human. That path is verified by review, not CI.
 on:
   pull_request:
     types: [opened, synchronize, reopened]
@@ -55,16 +59,20 @@ jobs:
 
       # Only same-repo PRs get a writable token; fork PRs get a read-only token,
       # so the action intentionally skips the comment (no comment to assert).
-      - name: Assert sticky plan comment was posted
+      - name: Assert sticky plan comment was posted (with link + inlined plan)
         if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
         env:
           GH_TOKEN: ${{ github.token }}
         shell: bash
         run: |
           pr='${{ github.event.pull_request.number }}'
-          gh api "repos/${{ github.repository }}/issues/${pr}/comments" --jq '.[].body' \
-            | grep -q 'glueops-opentofu-plan' \
-            || { echo "::error::Expected sticky plan comment (marker) not found on PR #${pr}"; exit 1; }
+          body="$(gh api "repos/${{ github.repository }}/issues/${pr}/comments" --jq '.[] | select(.body | contains("glueops-opentofu-plan")) | .body')"
+          [ -n "$body" ] || { echo "::error::sticky plan comment (marker) not found on PR #${pr}"; exit 1; }
+          # Always-present artifact download link.
+          printf '%s' "$body" | grep -q 'tofu-plan.txt' || { echo "::error::comment missing the artifact download link"; exit 1; }
+          # Small fixture: the plan must be inlined (collapsible block + content).
+          printf '%s' "$body" | grep -q '<details>' || { echo "::error::comment did not inline the plan (<details> missing)"; exit 1; }
+          printf '%s' "$body" | grep -q 'null_resource' || { echo "::error::comment did not contain the inlined plan content"; exit 1; }
 
   verify-artifact:
     needs: smoke

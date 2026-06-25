@@ -54,7 +54,7 @@ inputs:
     description: The backend plugin name
     required: true
   add_github_comment:
-    description: Post a sticky comment on the PR linking to the full plan (job summary / artifact)
+    description: Post a sticky comment on the PR with the plan (inlined when it fits, otherwise a link to the tofu-plan.txt artifact)
     required: false
     default: "true"
   enable_slack_notification_for_approval:
@@ -207,7 +207,7 @@ runs:
         # it with margin; byte count is a safe proxy (UTF-8 bytes >= characters).
         max=64000
         marker='<!-- glueops-opentofu-plan -->'
-        link="⬇️ Download the full plan (one click, tofu-plan.txt): ${ARTIFACT_URL}"
+        link="⬇️ Download the full plan (tofu-plan.txt): ${ARTIFACT_URL}"
 
         # Backtick-safe fence longer than the longest run of backticks in the plan.
         longest=$(grep -oE '`+' "$PLAN_PATH" | awk '{ if (length > m) m = length } END { print m+0 }' || true)
@@ -326,3 +326,11 @@ runs:
         target: ${{ inputs.target }}
         replace: ${{ inputs.replace }}
         destroy: ${{ inputs.destroy }}
+
+    # Remove the approval-issue body file from the checkout. It must live under
+    # the workspace so the manual-approval Docker action can read it, but it
+    # contains the full plan (possibly sensitive), so don't leave it behind.
+    - name: Clean up plan body file
+      if: always()
+      shell: bash
+      run: rm -f "${GITHUB_WORKSPACE}/.glueops_approval_issue.md"

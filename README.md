@@ -69,12 +69,12 @@ jobs:
 GitHub issue and comment bodies are capped at **65,536 characters**, so a large plan can't always be posted inline. The action handles this as follows:
 
 - The full plan is **always** uploaded as a downloadable **artifact** named `tofu-plan.txt`. It is uploaded uncompressed (`archive: false`), so it downloads as a single `.txt` file with no zip to extract, and has no practical size limit.
-- On pull requests, a single sticky comment is posted (and updated in place on each push) that **always** has a one-click link to download the artifact, and **also inlines the full plan** (in a collapsible block) **when the whole comment fits** under the 65,536-character limit. If the plan is too large to fit, the comment is link-only — it never includes a partial plan. Controlled by `add_github_comment` (default `true`; set `false` to disable). The upstream dflook plan comment is always disabled, since it truncates large plans.
-- On an apply to `main` that requires manual approval, the approval issue created by [manual-approval](https://github.com/trstringer/manual-approval) does the same: always a one-click artifact download link, plus the inlined plan when it fits.
+- On pull requests, a single sticky comment is posted (and updated in place on each push) that **always** has a link to download the artifact, and **also inlines the full plan** (in a collapsible block) **when the whole comment fits** under the 65,536-character limit. If the plan is too large to fit, the comment is link-only — it never includes a partial plan. Controlled by `add_github_comment` (default `true`; set `false` to disable). The upstream dflook plan comment is always disabled, since it truncates large plans.
+- On an apply to `main` that requires manual approval, [manual-approval](https://github.com/trstringer/manual-approval) posts the same content as a **comment on the approval issue**: always the artifact download link, plus the inlined plan when it fits.
 
 > **Note:** Both surfaces depend on a human-readable plan being produced. For `remote`/`cloud` backends running in auto-approve mode, OpenTofu emits no text plan (`text_plan_path` is unset), so the artifact and the inline plan are skipped. Non-PR runs (`push` to `main`, `workflow_dispatch`) post no PR comment; the plan is on the artifact, and on `main` the approval issue links to it.
 
-> **⚠️ Sensitive data:** A plan can contain secrets in cleartext — any provider/resource attribute not explicitly marked `sensitive` (connection strings, IAM policy documents, tokens, etc.) is rendered verbatim. The `tofu-plan.txt` artifact — and the plan inlined in the PR comment / approval issue when small enough — are visible to anyone with read/Actions access to the repository, and the artifact is kept per your repository's default artifact retention. Treat them accordingly: restrict repository access and/or lower the artifact retention if your plans can expose sensitive values.
+> **⚠️ Sensitive data:** A plan can contain secrets in cleartext — any provider/resource attribute not explicitly marked `sensitive` (connection strings, IAM policy documents, tokens, etc.) is rendered verbatim. The `tofu-plan.txt` artifact — and the plan inlined in the PR comment / approval issue when small enough — are visible to anyone with read/Actions access to the repository. Because the plan is also posted as a comment/issue, the full body is additionally delivered via GitHub **email/push notifications** to PR and issue subscribers. The artifact is kept per your repository's default artifact retention. Treat all of these accordingly: restrict repository access, watch who is subscribed, and/or lower the artifact retention if your plans can expose sensitive values.
 
 Because the artifact and the comment/issue are produced before the approval gate, you can review the plan and then approve or deny — no need to cancel and re-run.
 
@@ -104,7 +104,7 @@ Beyond `contents: read` for checkout, the `tofu-plan.txt` artifact needs no `GIT
 | `replace` | List of resources to replace if an update is required, one per line | ❌ | `""` |
 | `destroy` | Create and apply a plan to destroy all resources | ❌ | `false` |
 | `backend_type` | The backend plugin name | ✅ | _None_ |
-| `add_github_comment` | Post a sticky comment on the PR linking to the full plan (job summary / artifact). | ❌ | `true` |
+| `add_github_comment` | Post a sticky PR comment with the plan (inlined when it fits, otherwise a link to the `tofu-plan.txt` artifact). | ❌ | `true` |
 | `enable_slack_notification_for_approval` | **Deprecated and ignored.** Slack notifications have been removed; retained only for backward compatibility. | ❌ | `""` |
 | `ENABLE_DANGEROUS_AUTO_APPLY_MODE` | If enabled, any changes including Destroy, Apply, and Replace will be automatically approved (skips the manual approval step). | ❌ | `false` |
 
