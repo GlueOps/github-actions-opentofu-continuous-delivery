@@ -192,16 +192,30 @@ runs:
           echo "$fence"
         } >> "$GITHUB_STEP_SUMMARY"
 
-    # Always uploads the full plan as a downloadable artifact. Artifacts have no
-    # practical size limit, so this guarantees the full plan is accessible even
-    # when it is too large for the job summary or a comment.
+    # Copy the plan to a clean, predictable filename. With archive: false the
+    # uploaded file's name becomes the artifact name (the name: input is ignored),
+    # so we set it here. Path is passed via env to avoid shell injection.
+    - name: Stage plan file for artifact
+      id: stage_plan
+      if: steps.plan.outputs.text_plan_path != ''
+      shell: bash
+      env:
+        PLAN_PATH: ${{ steps.plan.outputs.text_plan_path }}
+      run: |
+        dest="${RUNNER_TEMP}/tofu-plan.txt"
+        cp "$PLAN_PATH" "$dest"
+        echo "path=$dest" >> "$GITHUB_OUTPUT"
+
+    # Always uploads the full plan as a single uncompressed file (archive: false),
+    # so it downloads as tofu-plan.txt directly with no zip to extract. Artifacts
+    # have no practical size limit, guaranteeing the full plan is always accessible.
     - name: Upload full plan as artifact
       id: upload_plan
       if: steps.plan.outputs.text_plan_path != ''
       uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       with:
-        name: tofu-plan
-        path: ${{ steps.plan.outputs.text_plan_path }}
+        path: ${{ steps.stage_plan.outputs.path }}
+        archive: false
 
     # Posts (or updates) a single sticky PR comment linking to the full plan.
     # Replaces dflook's inline comment, which truncates large plans. Gated on
