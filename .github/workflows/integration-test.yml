@@ -11,6 +11,14 @@ name: Integration Test
 on:
   pull_request:
     types: [opened, synchronize, reopened]
+    # Skip CI on release-please's release PR. It only edits CHANGELOG.md and
+    # .release-please-manifest.json (no action code), and it's authored by
+    # github-actions[bot], which the org's outside-contributor approval policy
+    # gates behind a manual "Approve and run". A path filter means no run is
+    # created for a PR touching only these files, so there's nothing to approve.
+    paths-ignore:
+      - 'CHANGELOG.md'
+      - '.release-please-manifest.json'
   push:
     branches: [main]
 
