@@ -1,0 +1,28 @@
+name: release-please
+
+# Release automation driven by Conventional Commits. On every push to main,
+# release-please maintains a "release PR" that bumps the version and updates
+# CHANGELOG.md from the commit history. Merging that PR cuts the GitHub release
+# and the vX.Y.Z tag. Replaces the old scheduled bump_version.yaml.
+on:
+  push:
+    branches: [main]
+
+# Don't let overlapping pushes race on the release PR.
+concurrency:
+  group: release-please-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
