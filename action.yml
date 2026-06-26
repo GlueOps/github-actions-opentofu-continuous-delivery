@@ -57,12 +57,6 @@ inputs:
     description: Post a sticky comment on the PR with the plan (inlined when it fits, otherwise a link to the tofu-plan.txt artifact)
     required: false
     default: "true"
-  enable_slack_notification_for_approval:
-    description: "DEPRECATED and ignored. Slack notifications have been removed entirely. This input is retained only to avoid breaking existing workflows that still set it."
-    required: false
-    # Defaults to empty so the deprecation warning below only fires for consumers
-    # who still explicitly set this input, not on every run.
-    default: ""
   ENABLE_DANGEROUS_AUTO_APPLY_MODE:
     description: "If enabled, any changes including: Destroy, Apply, Replace will be automatically approved."
     required: false
@@ -106,14 +100,6 @@ runs:
   steps:
     - name: Checkout
       uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
-
-    # Slack notifications were removed entirely. The `enable_slack_notification_for_approval`
-    # input is kept as a no-op so existing workflows that still set it don't break.
-    - name: Slack notifications removed (deprecation notice)
-      if: inputs.enable_slack_notification_for_approval != ''
-      shell: bash
-      run: |
-        echo "::warning title=Slack notifications removed::Slack notifications have been removed from this action. The 'enable_slack_notification_for_approval' input is now ignored and retained only for backward compatibility. Please remove it from your workflow."
 
     - name: tofu fmt
       uses: dflook/tofu-fmt-check@1ae8a83029b8ad8e6c6a12834e0d3d9cd0e34d5f # v2.2.3

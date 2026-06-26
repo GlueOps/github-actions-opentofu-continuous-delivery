@@ -105,7 +105,6 @@ Beyond `contents: read` for checkout, the `tofu-plan.txt` artifact needs no `GIT
 | `destroy` | Create and apply a plan to destroy all resources | ❌ | `false` |
 | `backend_type` | The backend plugin name | ✅ | _None_ |
 | `add_github_comment` | Post a sticky PR comment with the plan (inlined when it fits, otherwise a link to the `tofu-plan.txt` artifact). | ❌ | `true` |
-| `enable_slack_notification_for_approval` | **Deprecated and ignored.** Slack notifications have been removed; retained only for backward compatibility. | ❌ | `""` |
 | `ENABLE_DANGEROUS_AUTO_APPLY_MODE` | If enabled, any changes including Destroy, Apply, and Replace will be automatically approved (skips the manual approval step). | ❌ | `false` |
 
 ## Outputs
