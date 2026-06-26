@@ -298,7 +298,12 @@ runs:
     ## DO NOT REMOVE THIS MANUAL APPROVAL STEP UNLESS YOU WANT AUTO APPLY WITHOUT ANY APPROVALS.
     - name: Approve or Deny tofu apply
       if: github.ref_name == 'main' && steps.plan.outputs.changes == 'true' && inputs.ENABLE_DANGEROUS_AUTO_APPLY_MODE == 'false'
-      uses: trstringer/manual-approval@74d99dff7380e3e4b122d4ededcbca2b6ce59367 # v1
+      # Vendored copy of trstringer/manual-approval (v1.12.0) with the Docker
+      # image pinned to an immutable digest — see vendored/manual-approval/action.yaml.
+      # Referenced by full repo path: a local "./" ref does NOT resolve from
+      # inside a composite action (actions/runner#1348). The @ref is the commit
+      # that contains the vendored file; bump it when the vendored file changes.
+      uses: GlueOps/github-actions-opentofu-continuous-delivery/vendored/manual-approval@f77db6210b99a916ea1c16aa14722a3e96fe20e4 # trstringer/manual-approval v1.12.0, digest-pinned
       with:
         secret: ${{ github.token }}
         approvers: ${{ github.actor }}
