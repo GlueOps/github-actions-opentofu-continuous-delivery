@@ -4,7 +4,10 @@
     ".": {
       "release-type": "simple",
       "include-component-in-tag": false,
-      "changelog-path": "CHANGELOG.md"
+      "changelog-path": "CHANGELOG.md",
+      "extra-files": [
+        { "type": "generic", "path": "README.md" }
+      ]
     }
   }
 }
