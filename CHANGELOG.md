@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.1.0](https://github.com/GlueOps/github-actions-opentofu-continuous-delivery/compare/v6.0.0...v6.1.0) (2026-06-26)
+
+
+### Features
+
+* trigger 6.1.0 release ([#146](https://github.com/GlueOps/github-actions-opentofu-continuous-delivery/issues/146)) ([9a32c2b](https://github.com/GlueOps/github-actions-opentofu-continuous-delivery/commit/9a32c2babe1fbdfaa0aac674b59c3b612205f8c7))
+
 ## [6.0.0](https://github.com/GlueOps/github-actions-opentofu-continuous-delivery/compare/v5.1.0...v6.0.0) (2026-06-26)
 
 
