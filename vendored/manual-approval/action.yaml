@@ -1,0 +1,81 @@
+# Vendored copy of trstringer/manual-approval's action.yaml.
+#
+# Source:  https://github.com/trstringer/manual-approval (tag v1.12.0,
+#          commit 74d99dff7380e3e4b122d4ededcbca2b6ce59367)
+# Why:     The upstream action.yaml references the Docker image by the MUTABLE
+#          tag ":1.12.0". This copy is byte-for-byte identical EXCEPT the image
+#          is pinned to an immutable SHA-256 digest (see the runs.image line).
+#          This closes the supply-chain gap in
+#          https://github.com/trstringer/manual-approval/issues/214 without
+#          forking the Go codebase — we still run trstringer's published image.
+#
+# To update: re-verify the digest with
+#   docker buildx imagetools inspect ghcr.io/trstringer/manual-approval:<ver>
+# then bump both the version reference above and the digest below.
+name: Manual Workflow Approval
+description: Pause a workflow and get user approval to continue
+branding:
+  icon: pause
+  color: yellow
+inputs:
+  approvers:
+    description: Required approvers
+    required: true
+  secret:
+    description: Secret
+    required: true
+  minimum-approvals:
+    description: Minimum number of approvals to progress workflow
+    required: false
+  issue-title:
+    description: The custom subtitle for the issue
+    required: false
+  issue-body:
+    description: The custom body for the issue
+    required: false
+  issue-body-file-path:
+    description: The file path to a custom body for the issue
+    required: false
+  exclude-workflow-initiator-as-approver:
+    description: Whether or not to filter out the user who initiated the workflow as an approver if they are in the approvers list
+    required: false
+    default: 'false'
+  additional-approved-words:
+    description: Comma separated list of words that can be used to approve beyond the defaults.
+    required: false
+    default: ''
+  additional-denied-words:
+    description: Comma separated list of words that can be used to deny beyond the defaults.
+    required: false
+    default: ''
+  target-repository-owner:
+    description: Owner of the repository in which the issue will be created.
+    default: ''
+  target-repository:
+    description: Name of the repository in which the issue will be created.
+    default: ''
+  fail-on-denial:
+    description: Whether or not to fail the workflow if the approval is denied
+    required: false
+    default: 'true'
+  polling-interval-seconds:
+    description: Number of seconds to wait between polling GitHub API for approval status
+    required: false
+    default: '10'
+  close-issue-means-denial:
+    description: >
+      If true, closing the approval issue without an explicit approval
+      comment will be treated as a denial. Disabled by default.
+    required: false
+    default: "false"
+outputs:
+  issue-number:
+    description: The number of the issue created
+  issue-url:
+    description: The URL of the issue created
+  approval-status:
+    description: The status of the approval ("approved" or "denied")
+runs:
+  using: docker
+  # Pinned by digest (was: docker://ghcr.io/trstringer/manual-approval:1.12.0)
+  image: docker://ghcr.io/trstringer/manual-approval@sha256:59bd4cd8be925c77642bb6a2f32c359ab5568e74d5b47edb3eec26b750d4873c
