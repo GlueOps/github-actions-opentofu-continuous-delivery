@@ -1,5 +1,16 @@
 # Changelog
 
+## [6.0.0](https://github.com/GlueOps/github-actions-opentofu-continuous-delivery/compare/v5.1.0...v6.0.0) (2026-06-26)
+
+
+### ⚠ BREAKING CHANGES
+
+* the enable_slack_notification_for_approval input has been removed from the action's interface. In practice it was already ignored, and GitHub silently ignores undeclared 'with:' inputs, so existing workflows that still set it will continue to run. It is flagged as breaking because a documented input has been removed from the public API.
+
+### Features
+
+* remove Slack notification surface entirely ([#142](https://github.com/GlueOps/github-actions-opentofu-continuous-delivery/issues/142)) ([68b344a](https://github.com/GlueOps/github-actions-opentofu-continuous-delivery/commit/68b344a362fb1180e1ab7a0441eba8b753246064))
+
 ## [5.1.0](https://github.com/GlueOps/github-actions-opentofu-continuous-delivery/compare/v5.0.0...v5.1.0) (2026-06-26)
 
 
