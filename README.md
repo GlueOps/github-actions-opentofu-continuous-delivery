@@ -15,7 +15,7 @@ Example:
 ```yaml
 env:
   TERRAFORM_ACTIONS_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  OPENTOFU_VERSION: "1.6.2"
+  OPENTOFU_VERSION: "1.8.5"
   # more provider environment variables can be set here
 
 
@@ -43,7 +43,7 @@ jobs:
       cancel-in-progress: false
     steps:
       - name: OpenTofu CD              
-        uses: GlueOps/github-actions-opentofu-continuous-delivery@v0.0.9
+        uses: GlueOps/github-actions-opentofu-continuous-delivery@v5.0.0
         with:
           backend_config: |
             access_key=${{ vars.TF_S3_BACKEND_AWS_ACCESS_KEY }}
@@ -137,14 +137,14 @@ Add the following secrets to your GitHub repository under `Settings > Secrets an
 Set the following environment variables in your workflow:
 
 - `TERRAFORM_ACTIONS_GITHUB_TOKEN`: Typically set to `${{ secrets.GITHUB_TOKEN }}`.
-- `OPENTOFU_VERSION`: Version of OpenTofu to use (e.g., `1.6.2`).
+- `OPENTOFU_VERSION`: Version of OpenTofu to use (e.g., `1.8.5`).
 
 Example:
 
 ```yaml
 env:
   TERRAFORM_ACTIONS_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  OPENTOFU_VERSION: "1.6.2"
+  OPENTOFU_VERSION: "1.8.5"
   # Additional environment variables can be added here
 ```
 
