@@ -1,5 +1,17 @@
 # Changelog
 
+## [6.1.1](https://github.com/GlueOps/github-actions-opentofu-continuous-delivery/compare/v6.1.0...v6.1.1) (2026-06-30)
+
+
+### Bug Fixes
+
+* authenticate release-please via GitHub App token ([#149](https://github.com/GlueOps/github-actions-opentofu-continuous-delivery/issues/149)) ([d8baf59](https://github.com/GlueOps/github-actions-opentofu-continuous-delivery/commit/d8baf59804375f43b073fbbfe40c469009444cdf))
+
+
+### Continuous Integration
+
+* bring release-please config up to GlueOps convention ([#151](https://github.com/GlueOps/github-actions-opentofu-continuous-delivery/issues/151)) ([9a04546](https://github.com/GlueOps/github-actions-opentofu-continuous-delivery/commit/9a045467d6134b801f50bee491056225049c0228))
+
 ## [6.1.0](https://github.com/GlueOps/github-actions-opentofu-continuous-delivery/compare/v6.0.0...v6.1.0) (2026-06-26)
 
 
