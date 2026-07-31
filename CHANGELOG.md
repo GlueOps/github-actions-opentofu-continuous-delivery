@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.1.2](https://github.com/GlueOps/github-actions-opentofu-continuous-delivery/compare/v6.1.1...v6.1.2) (2026-07-31)
+
+
+### Miscellaneous Chores
+
+* add Apache-2.0 LICENSE ([#156](https://github.com/GlueOps/github-actions-opentofu-continuous-delivery/issues/156)) ([c39ce24](https://github.com/GlueOps/github-actions-opentofu-continuous-delivery/commit/c39ce246d848b22fdacb6d0e076954b53a2b3cfa))
+
 ## [6.1.1](https://github.com/GlueOps/github-actions-opentofu-continuous-delivery/compare/v6.1.0...v6.1.1) (2026-06-30)
 
 
