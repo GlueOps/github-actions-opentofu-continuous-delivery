@@ -125,7 +125,7 @@ runs:
         backend_config_file: ${{ inputs.backend_config_file }}
 
     - name: Test tofu-version
-      uses: dflook/tofu-version@9a5175482d81916fc46c86e2613f4ad06703bd18 # v2.2.3
+      uses: dflook/tofu-version@ba6bf1db838aab801c0a150b9c7c0fcb778557da # v3.0.0
       id: Versions
       with:
         path: ${{ inputs.path }}
