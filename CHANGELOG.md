@@ -1,5 +1,19 @@
 # Changelog
 
+## [6.1.2](https://github.com/GlueOps/github-actions-opentofu-continuous-delivery/compare/v6.1.1...v6.1.2) (2026-11-06)
+
+
+### Miscellaneous Chores
+
+* add Apache-2.0 LICENSE ([#156](https://github.com/GlueOps/github-actions-opentofu-continuous-delivery/issues/156)) ([c39ce24](https://github.com/GlueOps/github-actions-opentofu-continuous-delivery/commit/c39ce246d848b22fdacb6d0e076954b53a2b3cfa))
+
+
+### Dependencies
+
+* update actions/checkout digest to d23441a ([#168](https://github.com/GlueOps/github-actions-opentofu-continuous-delivery/issues/168)) ([e98d4cc](https://github.com/GlueOps/github-actions-opentofu-continuous-delivery/commit/e98d4cc10e648fa965980486121e337da131404a))
+* update actions/download-artifact action to v8.0.2 ([#171](https://github.com/GlueOps/github-actions-opentofu-continuous-delivery/issues/171)) ([de2b1b6](https://github.com/GlueOps/github-actions-opentofu-continuous-delivery/commit/de2b1b673ec01f1b9e33df2587027348faef6f67))
+* update actions/upload-artifact action to v7.0.2 ([#172](https://github.com/GlueOps/github-actions-opentofu-continuous-delivery/issues/172)) ([ac165a1](https://github.com/GlueOps/github-actions-opentofu-continuous-delivery/commit/ac165a1bad0d57e37991b3f9aae29e96be2ff767))
+
 ## [6.1.1](https://github.com/GlueOps/github-actions-opentofu-continuous-delivery/compare/v6.1.0...v6.1.1) (2026-06-30)
 
 
