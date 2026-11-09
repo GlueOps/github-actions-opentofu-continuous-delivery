@@ -17,7 +17,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: mirror-e2e-${{ github.ref }}
+  group: mirror-e2e-${{ github.event_name }}-${{ github.ref }}
   cancel-in-progress: true
 
 permissions:
@@ -34,6 +34,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
 
       - name: Build tofu-cache
         env:
@@ -43,19 +45,20 @@ jobs:
           set -euo pipefail
           ref=$TOFU_CACHE_REF
           if [ "$GITHUB_EVENT_NAME" = schedule ]; then
-            if latest=$(gh api repos/GlueOps/tofu-cache/releases/latest --jq .tag_name 2>/dev/null); then
-              ref=$latest
-            else
+            # Only a 404 means "no release yet"; any other failure must not quietly test the pin.
+            rc=0; out=$(gh api repos/GlueOps/tofu-cache/releases/latest --jq .tag_name 2>&1) || rc=$?
+            if [ "$rc" -eq 0 ]; then
+              ref=$out
+            elif grep -q 'HTTP 404' <<<"$out"; then
               echo "::notice::tofu-cache has no release yet; using the pinned ref"
+            else
+              echo "::error::could not look up tofu-cache's latest release: $out"; exit 1
             fi
           fi
           echo "tofu-cache ref: $ref"
-          src="$RUNNER_TEMP/tofu-cache"
-          git init -q "$src"
-          git -C "$src" fetch -q --depth 1 https://github.com/GlueOps/tofu-cache.git "$ref"
-          git -C "$src" checkout -q FETCH_HEAD
-          docker build -q -t tc-providers "$src/providers"
-          docker build -q -t tc-git "$src/git"
+          src="https://github.com/GlueOps/tofu-cache.git#$ref"
+          docker build -q -t tc-providers "$src:providers"
+          docker build -q -t tc-git "$src:git"
 
       # Caddy joins the default bridge, which the action's docker steps (dflook) run on.
       - name: Start the mirror

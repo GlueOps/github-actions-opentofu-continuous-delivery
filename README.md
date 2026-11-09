@@ -154,7 +154,7 @@ env:
   including `git push`, are unaffected.
 
 CI (`mirror-e2e.yml`) runs the action through a tofu-cache mirror built from a pinned
-tofu-cache version, and nightly against tofu-cache's latest release.
+tofu-cache version, and nightly against tofu-cache's latest release (once one exists).
 
 ## Secrets and Environment Variables
 
