@@ -1,6 +1,6 @@
 name: Mirror end-to-end
 
-# Runs the action through a real tofu-cache mirror (built from GlueOps/tofu-cache) and
+# Runs the action through a real tofu-cache mirror (GlueOps/tofu-cache's `latest` images) and
 # checks providers and GitHub modules were fetched through it. Its own workflow because
 # the action's plan artifact name (tofu-plan.txt) must be unique per workflow run.
 on:
@@ -24,9 +24,6 @@ permissions:
   contents: read
 
 env:
-  # Every run tests tofu-cache's latest release. Only while tofu-cache has no release
-  # yet, this commit (tofu-cache#1's head) is used instead; remove it after v0.0.1.
-  TOFU_CACHE_BOOTSTRAP_REF: b39023557a4b2d566f00fdfa36ac1dd4a87b3067
   OPENTOFU_VERSION: "1.8.5"
 
 jobs:
@@ -38,25 +35,16 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Build tofu-cache
-        env:
-          GH_TOKEN: ${{ github.token }}
+      # `latest` is tofu-cache's newest release.
+      - name: Pull tofu-cache
         shell: bash
         run: |
           set -euo pipefail
-          # Only a 404 means "no release yet"; any other failure must not quietly test something else.
-          if out=$(gh api repos/GlueOps/tofu-cache/releases/latest --jq .tag_name 2>&1); then
-            ref=$out
-          elif grep -q 'HTTP 404' <<<"$out"; then
-            ref=$TOFU_CACHE_BOOTSTRAP_REF
-            echo "::notice::tofu-cache has no release yet; using $ref"
-          else
-            echo "::error::could not look up tofu-cache's latest release: $out"; exit 1
-          fi
-          echo "tofu-cache ref: $ref"
-          src="https://github.com/GlueOps/tofu-cache.git#$ref"
-          docker build -q -t tc-providers "$src:providers"
-          docker build -q -t tc-git "$src:git"
+          for image in providers git; do
+            docker pull -q "ghcr.io/glueops/tofu-cache-$image:latest"
+            docker tag "ghcr.io/glueops/tofu-cache-$image:latest" "tc-$image"
+          done
+          docker image inspect -f 'tofu-cache revision: {{index .Config.Labels "org.opencontainers.image.revision"}}' tc-providers
 
       # Caddy joins the default bridge, which the action's docker steps (dflook) run on.
       - name: Start the mirror

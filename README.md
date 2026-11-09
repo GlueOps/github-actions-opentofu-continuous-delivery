@@ -153,9 +153,8 @@ env:
 - The configuration is removed when the action finishes, so later steps in the job,
   including `git push`, are unaffected.
 
-CI (`mirror-e2e.yml`) runs the action through a tofu-cache mirror built from
-tofu-cache's latest release (until its first release, a fixed tofu-cache#1 commit), on
-every PR and push and nightly.
+CI (`mirror-e2e.yml`) runs the action through a mirror made of tofu-cache's `latest`
+images (its newest release), on every PR and push and nightly.
 
 ## Secrets and Environment Variables
 
