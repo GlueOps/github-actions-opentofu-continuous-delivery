@@ -111,10 +111,14 @@ jobs:
             '^200 [A-Z-]+ [0-9]+ "/repository/tofu/registry\.opentofu\.org/v1/providers/hashicorp/random/[^"]+/download/' "$p"
           need "registry.terraform.io download API via mirror" \
             '^200 [A-Z-]+ [0-9]+ "/repository/tofu/registry\.terraform\.io/v1/providers/hashicorp/null/[^"]+/download/' "$p"
-          need "GitHub release files via mirror" '^200 [A-Z-]+ [0-9]+ "/repository/tofu/dl/github/' "$p"
+          need "GitHub release files via mirror" '^200 [A-Z-]+ [0-9]+ "/repository/tofu/dl/github/opentofu/' "$p"
+          need "partner provider release files via mirror" '^200 [A-Z-]+ [0-9]+ "/repository/tofu/dl/github/integrations/' "$p"
           need "releases.hashicorp.com files via mirror" '^200 [A-Z-]+ [0-9]+ "/repository/tofu/dl/hashicorp/' "$p"
-          need "registry module cloned via mirror" 'repo=cloudposse/terraform-null-label event=(clone|hit)' "$g"
-          need "git:: module cloned via mirror" 'repo=hashicorp/terraform-cidr-subnets event=(clone|hit)' "$g"
+          # One git rewrite covers every source form, and the registry and git:: modules share
+          # repos, so these check per repo; a source that fails to fetch fails the action itself.
+          need "cloudposse/terraform-null-label cloned via mirror" 'repo=cloudposse/terraform-null-label event=(clone|hit)' "$g"
+          need "hashicorp/terraform-template-dir cloned via mirror" 'repo=hashicorp/terraform-template-dir event=(clone|hit)' "$g"
+          need "hashicorp/terraform-cidr-subnets cloned via mirror" 'repo=hashicorp/terraform-cidr-subnets event=(clone|hit)' "$g"
           h="$RUNNER_TEMP/_github_home"
           if [ -f "$h/.terraformrc" ] && [ -f "$h/.gitconfig" ] && ! grep -q 'BEGIN tofu-mirror' "$h/.terraformrc" "$h/.gitconfig"; then
             echo "ok: mirror config removed after the action"
