@@ -112,8 +112,8 @@ jobs:
         shell: bash
         run: bash test/tofu-mirror-test.sh
 
-      # The off-path smoke run can't show the cleanup works, so guard its wiring:
-      # without it the git rewrite leaks into the caller's later container actions.
+      # Guards the cleanup's wiring: without it the git rewrite leaks into the caller's
+      # later container actions. mirror-e2e.yml exercises the on path end to end.
       - name: Check the mirror step and its cleanup are wired in
         shell: bash
         run: |

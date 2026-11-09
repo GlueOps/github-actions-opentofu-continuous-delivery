@@ -1,0 +1,136 @@
+name: Mirror end-to-end
+
+# Runs the action through a real tofu-cache mirror (built from GlueOps/tofu-cache) and
+# checks providers and GitHub modules were fetched through it. Its own workflow because
+# the action's plan artifact name (tofu-plan.txt) must be unique per workflow run.
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths-ignore:
+      - 'CHANGELOG.md'
+      - '.release-please-manifest.json'
+  push:
+    branches: [main]
+  # Nightly against tofu-cache's latest release; PRs and pushes use the pinned ref.
+  schedule:
+    - cron: '30 5 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: mirror-e2e-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  # Bump by PR. tofu-cache#1's head until its first release (v0.0.1) exists.
+  TOFU_CACHE_REF: b39023557a4b2d566f00fdfa36ac1dd4a87b3067
+  OPENTOFU_VERSION: "1.8.5"
+
+jobs:
+  mirror-on:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+
+      - name: Build tofu-cache
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          ref=$TOFU_CACHE_REF
+          if [ "$GITHUB_EVENT_NAME" = schedule ]; then
+            if latest=$(gh api repos/GlueOps/tofu-cache/releases/latest --jq .tag_name 2>/dev/null); then
+              ref=$latest
+            else
+              echo "::notice::tofu-cache has no release yet; using the pinned ref"
+            fi
+          fi
+          echo "tofu-cache ref: $ref"
+          src="$RUNNER_TEMP/tofu-cache"
+          git init -q "$src"
+          git -C "$src" fetch -q --depth 1 https://github.com/GlueOps/tofu-cache.git "$ref"
+          git -C "$src" checkout -q FETCH_HEAD
+          docker build -q -t tc-providers "$src/providers"
+          docker build -q -t tc-git "$src/git"
+
+      # Caddy joins the default bridge, which the action's docker steps (dflook) run on.
+      - name: Start the mirror
+        id: mirror
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > "$RUNNER_TEMP/Caddyfile" <<'CADDY'
+          {
+          	auto_https off
+          	admin off
+          }
+
+          :80 {
+          	handle /repository/tofu/* {
+          		reverse_proxy providers:8080
+          	}
+          	handle /repository/git/* {
+          		reverse_proxy git:8080 {
+          			flush_interval -1
+          		}
+          	}
+          }
+          CADDY
+          docker network create tc
+          docker run -d --name providers --network tc --read-only --tmpfs /tmp tc-providers
+          docker run -d --name git --network tc --read-only --tmpfs /tmp tc-git
+          docker run -d --name caddy --network tc -v "$RUNNER_TEMP/Caddyfile:/etc/caddy/Caddyfile:ro" \
+            caddy:2.11.9-alpine@sha256:0bbb055bda6793c999bde78b1b5ce3e89f829fb031af2cf50056ea1246559fee
+          docker network connect bridge caddy
+          url="http://$(docker inspect -f '{{.NetworkSettings.Networks.bridge.IPAddress}}' caddy)"
+          curl -fsS -o /dev/null --retry 30 --retry-delay 2 --retry-all-errors --max-time 15 \
+            "$url/repository/tofu/registry.opentofu.org/v1/providers/hashicorp/random/versions"
+          echo "mirror: $url"
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+
+      - name: Run action under test through the mirror
+        id: tofu
+        uses: ./
+        with:
+          path: test/mirror
+          backend_type: local
+          add_github_comment: "false"
+          ENABLE_DANGEROUS_AUTO_APPLY_MODE: "true"
+          tofu_mirror_url: ${{ steps.mirror.outputs.url }}
+
+      - name: Assert providers and modules came through the mirror
+        env:
+          CHANGES: ${{ steps.tofu.outputs.changes }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          fail=0
+          need() { if grep -qE "$2" <<<"$3"; then echo "ok: $1"; else echo "::error::$1"; fail=1; fi; }
+          p=$(docker logs providers 2>&1)
+          g=$(docker logs git 2>&1)
+          need "plan has changes" '^true$' "$CHANGES"
+          need "registry.opentofu.org download API via mirror" \
+            '^200 [A-Z-]+ [0-9]+ "/repository/tofu/registry\.opentofu\.org/v1/providers/hashicorp/random/[^"]+/download/' "$p"
+          need "registry.terraform.io download API via mirror" \
+            '^200 [A-Z-]+ [0-9]+ "/repository/tofu/registry\.terraform\.io/v1/providers/hashicorp/null/[^"]+/download/' "$p"
+          need "GitHub release files via mirror" '^200 [A-Z-]+ [0-9]+ "/repository/tofu/dl/github/' "$p"
+          need "releases.hashicorp.com files via mirror" '^200 [A-Z-]+ [0-9]+ "/repository/tofu/dl/hashicorp/' "$p"
+          need "registry module cloned via mirror" 'repo=cloudposse/terraform-null-label event=(clone|hit)' "$g"
+          need "git:: module cloned via mirror" 'repo=hashicorp/terraform-cidr-subnets event=(clone|hit)' "$g"
+          h="$RUNNER_TEMP/_github_home"
+          if [ -f "$h/.terraformrc" ] && [ -f "$h/.gitconfig" ] && ! grep -q 'BEGIN tofu-mirror' "$h/.terraformrc" "$h/.gitconfig"; then
+            echo "ok: mirror config removed after the action"
+          else
+            echo "::error::mirror config not removed from $h"; fail=1
+          fi
+          exit "$fail"
+
+      - name: Mirror logs
+        if: always()
+        shell: bash
+        run: |
+          for c in providers git caddy; do echo "::group::$c"; docker logs "$c" 2>&1 || true; echo "::endgroup::"; done
