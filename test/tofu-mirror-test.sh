@@ -9,11 +9,13 @@ fail=0
 check() { local d=$1; shift; if "$@"; then echo "PASS $d"; else echo "FAIL $d"; fail=1; fi; }
 lacks() { ! grep -q "$@"; }
 gitcfg() { git config -f "$H/.gitconfig" "$@"; }
+kept() { [ "$(gitcfg user.name)" = keep-me ] && grep -q /keep-me "$H/.terraformrc"; }
+cleared() { lacks tofu-mirror "$H/.terraformrc" "$H/.gitconfig"; }
 # A rejected value must warn, exit 0 and leave no mirror configured.
 rejected() {
   local out rc=0
   out=$(run "$1" 2>&1) || rc=$?
-  [ "$rc" -eq 0 ] && grep -q '::warning::' <<<"$out" && lacks tofu-mirror "$H/.terraformrc" "$H/.gitconfig"
+  [ "$rc" -eq 0 ] && grep -q '::warning::' <<<"$out" && cleared
 }
 
 printf '[user]\n    name = keep-me\n' > "$H/.gitconfig"
@@ -25,8 +27,7 @@ check "on: host block for registry.terraform.io keeps modules.v1 upstream" \
   grep -q '"modules.v1"   = "https://registry.terraform.io/v1/modules/"' "$H/.terraformrc"
 check "on: git rewrite parses with git" \
   test "$(gitcfg --get url.https://mirror.example.com/repository/git/github.com/.insteadof)" = https://github.com/
-check "on: existing .gitconfig and .terraformrc content kept" \
-  bash -c '[ "$(git config -f "$1/.gitconfig" user.name)" = keep-me ] && grep -q /keep-me "$1/.terraformrc"' _ "$H"
+check "on: existing .gitconfig and .terraformrc content kept" kept
 check "on: caller's own HOME untouched" test ! -e "$rt/caller"
 run "https://mirror.example.com" >/dev/null; run "https://mirror.example.com" >/dev/null
 check "repeat: exactly one section in each file" \
@@ -42,11 +43,12 @@ check "quote injection: rejected the same way" rejected 'https://a.example.com/"
 run "http://localhost:8080/path" >/dev/null
 check "http with port and path accepted" grep -q 'http://localhost:8080/path/repository/tofu' "$H/.terraformrc"
 run "off" >/dev/null
-check "off: sections removed, user config kept" \
-  bash -c '! grep -q tofu-mirror "$1/.terraformrc" "$1/.gitconfig" && [ "$(git config -f "$1/.gitconfig" user.name)" = keep-me ] && grep -q /keep-me "$1/.terraformrc"' _ "$H"
+check "off: sections removed" cleared
+check "off: user config kept" kept
 run "https://mirror.example.com" >/dev/null
 out=$(run "https://mirror.example.com" --remove 2>&1)
-check "--remove: sections removed silently, user config kept" \
-  bash -c '[ -z "$2" ] && ! grep -q tofu-mirror "$1/.terraformrc" "$1/.gitconfig" && grep -q /keep-me "$1/.terraformrc"' _ "$H" "$out"
+check "--remove: silent" test -z "$out"
+check "--remove: sections removed" cleared
+check "--remove: user config kept" kept
 check "empty: exits 0" run ""
 exit $fail

@@ -111,3 +111,21 @@ jobs:
       - name: Unit-test scripts/tofu-mirror.sh
         shell: bash
         run: bash test/tofu-mirror-test.sh
+
+      # The off-path smoke run can't show the cleanup works, so guard its wiring:
+      # without it the git rewrite leaks into the caller's later container actions.
+      - name: Check the mirror step and its cleanup are wired in
+        shell: bash
+        run: |
+          python3 -c 'import yaml' 2>/dev/null || pip install -q pyyaml
+          python3 - <<'EOF'
+          import yaml
+          steps = yaml.safe_load(open("action.yml"))["runs"]["steps"]
+          names = [s.get("name") for s in steps]
+          assert names[names.index("Checkout") + 1] == "tofu mirror", "mirror step must follow Checkout"
+          last = steps[-1]
+          assert last.get("name") == "Remove tofu mirror config", "cleanup must be the last step"
+          assert last.get("if") == "always()", "cleanup must run on failure too"
+          assert "tofu-mirror.sh\" --remove" in last.get("run", ""), "cleanup must call --remove"
+          print("mirror step and cleanup are wired in")
+          EOF
