@@ -62,7 +62,7 @@ inputs:
     required: false
     default: "false"
   tofu_mirror_url:
-    description: "Base URL of a GlueOps tofu-cache mirror (e.g. https://repo.gpkg.io) to fetch providers and GitHub modules through. Empty or 'off' = no mirror. Falls back to the TOFU_MIRROR_URL environment variable."
+    description: "Base URL of a GlueOps tofu-cache mirror (e.g. https://repo.example.com) to fetch providers and GitHub modules through. Empty or 'off' = no mirror. Falls back to the TOFU_MIRROR_URL environment variable."
     required: false
     default: ""
 
