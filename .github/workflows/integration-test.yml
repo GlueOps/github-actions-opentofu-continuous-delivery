@@ -98,3 +98,16 @@ jobs:
           ls -la plan
           grep -rq 'null_resource' plan \
             || { echo "::error::tofu-plan artifact did not contain the expected plan content"; exit 1; }
+
+  # The smoke job above covers the mirror step's default (off) path in the full action.
+  mirror-step:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+
+      - name: Unit-test scripts/tofu-mirror.sh
+        shell: bash
+        run: bash test/tofu-mirror-test.sh

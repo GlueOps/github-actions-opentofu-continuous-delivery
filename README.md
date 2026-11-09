@@ -106,6 +106,7 @@ Beyond `contents: read` for checkout, the `tofu-plan.txt` artifact needs no `GIT
 | `backend_type` | The backend plugin name | ✅ | _None_ |
 | `add_github_comment` | Post a sticky PR comment with the plan (inlined when it fits, otherwise a link to the `tofu-plan.txt` artifact). | ❌ | `true` |
 | `ENABLE_DANGEROUS_AUTO_APPLY_MODE` | If enabled, any changes including Destroy, Apply, and Replace will be automatically approved (skips the manual approval step). | ❌ | `false` |
+| `tofu_mirror_url` | Base URL of a tofu-cache mirror for providers and GitHub modules; empty or `off` disables it. Falls back to `TOFU_MIRROR_URL`. See [Provider and module mirror](#provider-and-module-mirror-opt-in). | ❌ | `""` |
 
 ## Outputs
 
@@ -122,6 +123,36 @@ Beyond `contents: read` for checkout, the `tofu-plan.txt` artifact needs no `GIT
 | `json_plan_path` | Path to the file containing the generated plan in JSON format. Not set if the backend is `remote` |
 | `run_id` | The remote run ID if using `remote` or `cloud` backend in remote execution mode |
 
+## Provider and module mirror (opt-in)
+
+When `TOFU_MIRROR_URL` (or the `tofu_mirror_url` input) is set to the base URL of a
+[GlueOps tofu-cache](https://github.com/GlueOps/tofu-cache) mirror, this action's
+OpenTofu steps fetch providers from `registry.opentofu.org` and `registry.terraform.io`,
+and modules hosted on GitHub (registry modules resolve to GitHub too), through it. That
+keeps `tofu init` working when GitHub is slow, rate-limiting or down. No `.tf` or lock
+file changes.
+
+Opt in with a variable passed through `env` (composite actions can't read `vars`):
+
+```yaml
+env:
+  TOFU_MIRROR_URL: ${{ vars.TOFU_MIRROR_URL }}   # e.g. https://repo.gpkg.io
+```
+
+- `tofu_mirror_url: "off"` (or `TOFU_MIRROR_URL: ""` on a job) opts a single job out.
+- A value that isn't an `http(s)://` base URL is ignored with a warning.
+- The mirror is public and anonymous, so **private** GitHub module sources over HTTPS
+  fail through it with `repository not found or not public`. Opt that repo out.
+- **The mirror is trusted.** It serves the provider signing keys along with the
+  packages, so commit `.terraform.lock.hcl`: its hashes are what stop a different
+  package from being installed. Modules fetched through it have no such check.
+- A `credentials "registry.terraform.io"` or `"registry.opentofu.org"` block (or such an
+  entry in `TERRAFORM_CLOUD_TOKENS`) is sent to the mirror. Those registries need no
+  token, so don't set one; credentials for other hosts (e.g. `app.terraform.io`) are
+  unaffected.
+- The configuration is removed when the action finishes, so later steps in the job,
+  including `git push`, are unaffected.
+
 ## Secrets and Environment Variables
 
 ### Secrets
@@ -137,6 +168,7 @@ Set the following environment variables in your workflow:
 
 - `TERRAFORM_ACTIONS_GITHUB_TOKEN`: Typically set to `${{ secrets.GITHUB_TOKEN }}`.
 - `OPENTOFU_VERSION`: Version of OpenTofu to use (e.g., `1.8.5`).
+- `TOFU_MIRROR_URL` (optional): base URL of a tofu-cache mirror; see [Provider and module mirror](#provider-and-module-mirror-opt-in).
 
 Example:
 
