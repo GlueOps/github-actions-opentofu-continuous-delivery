@@ -136,7 +136,7 @@ Opt in with a variable passed through `env` (composite actions can't read `vars`
 
 ```yaml
 env:
-  TOFU_MIRROR_URL: ${{ vars.TOFU_MIRROR_URL }}   # e.g. https://repo.gpkg.io
+  TOFU_MIRROR_URL: ${{ vars.TOFU_MIRROR_URL }}   # e.g. https://repo.example.com
 ```
 
 - `tofu_mirror_url: "off"` (or `TOFU_MIRROR_URL: ""` on a job) opts a single job out.
