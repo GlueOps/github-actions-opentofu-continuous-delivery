@@ -1,8 +1,9 @@
 name: Mirror end-to-end
 
-# Runs the action through a real tofu-cache mirror (GlueOps/tofu-cache's `latest` images) and
-# checks providers and GitHub modules were fetched through it. Its own workflow because
-# the action's plan artifact name (tofu-plan.txt) must be unique per workflow run.
+# Unit-tests scripts/tofu-mirror.sh, then runs the action through a real tofu-cache mirror
+# (GlueOps/tofu-cache's `latest` images) and checks providers and GitHub modules were
+# fetched through it. Its own workflow because the action's plan artifact name
+# (tofu-plan.txt) must be unique per workflow run.
 on:
   pull_request:
     types: [opened, synchronize, reopened]
@@ -34,6 +35,10 @@ jobs:
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           persist-credentials: false
+
+      - name: Unit-test scripts/tofu-mirror.sh
+        shell: bash
+        run: bash test/tofu-mirror-test.sh
 
       # `latest` is tofu-cache's newest release.
       - name: Pull tofu-cache

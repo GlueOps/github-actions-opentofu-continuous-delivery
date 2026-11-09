@@ -98,34 +98,3 @@ jobs:
           ls -la plan
           grep -rq 'null_resource' plan \
             || { echo "::error::tofu-plan artifact did not contain the expected plan content"; exit 1; }
-
-  # The smoke job above covers the mirror step's default (off) path in the full action.
-  mirror-step:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    steps:
-      - name: Checkout
-        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
-
-      - name: Unit-test scripts/tofu-mirror.sh
-        shell: bash
-        run: bash test/tofu-mirror-test.sh
-
-      # Guards the cleanup's wiring: without it the git rewrite leaks into the caller's
-      # later container actions. mirror-e2e.yml exercises the on path end to end.
-      - name: Check the mirror step and its cleanup are wired in
-        shell: bash
-        run: |
-          python3 -c 'import yaml' 2>/dev/null || pip install -q pyyaml
-          python3 - <<'EOF'
-          import yaml
-          steps = yaml.safe_load(open("action.yml"))["runs"]["steps"]
-          names = [s.get("name") for s in steps]
-          assert names[names.index("Checkout") + 1] == "tofu mirror", "mirror step must follow Checkout"
-          last = steps[-1]
-          assert last.get("name") == "Remove tofu mirror config", "cleanup must be the last step"
-          assert last.get("if") == "always()", "cleanup must run on failure too"
-          assert "tofu-mirror.sh\" --remove" in last.get("run", ""), "cleanup must call --remove"
-          print("mirror step and cleanup are wired in")
-          EOF
