@@ -61,6 +61,10 @@ inputs:
     description: "If enabled, any changes including: Destroy, Apply, Replace will be automatically approved."
     required: false
     default: "false"
+  tofu_mirror_url:
+    description: "Base URL of a GlueOps tofu-cache mirror (e.g. https://repo.example.com) to fetch providers and GitHub modules through. Empty or 'off' = no mirror. Falls back to the TOFU_MIRROR_URL environment variable."
+    required: false
+    default: ""
 
 outputs:
   tofu:
@@ -100,6 +104,12 @@ runs:
   steps:
     - name: Checkout
       uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+
+    - name: tofu mirror
+      shell: bash
+      env:
+        MIRROR: ${{ inputs.tofu_mirror_url || env.TOFU_MIRROR_URL }}
+      run: bash "$GITHUB_ACTION_PATH/scripts/tofu-mirror.sh"
 
     - name: tofu fmt
       uses: dflook/tofu-fmt-check@1ae8a83029b8ad8e6c6a12834e0d3d9cd0e34d5f # v2.2.3
@@ -327,3 +337,10 @@ runs:
       if: always()
       shell: bash
       run: rm -f "${GITHUB_WORKSPACE}/.glueops_approval_issue.md"
+
+    # The mirror config lives in $RUNNER_TEMP/_github_home, which is also HOME for
+    # the caller's later container actions (and every step of a `container:` job).
+    - name: Remove tofu mirror config
+      if: always()
+      shell: bash
+      run: bash "$GITHUB_ACTION_PATH/scripts/tofu-mirror.sh" --remove
